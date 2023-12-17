@@ -1,0 +1,163 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <!-- MDB icon -->
+    <!-- Font Awesome -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Google Fonts Roboto -->
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
+    />
+    <!-- MDB -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css"
+            rel="stylesheet"
+    />
+    <style>
+        body {
+            background-color: #C1CFEA;
+        }
+    </style>
+</head>
+<body>
+<!-- Start your project here-->
+<section class="vh-100" style="background-color: #C1CFEA; margin-top: -35px;">
+
+    <div class="container py-5 h-100">
+
+        <div class="row d-flex justify-content-center align-items-center h-100" style="color: #282828;">
+            <div class="col-md-9 col-lg-7 col-xl-5">
+
+                <div class="card mb-4 gradient-custom" style="border-radius: 25px;">
+                    <div class="card-body p-4">
+
+                        <div id="demo1" class="carousel slide" data-ride="carousel">
+                            <!-- Carousel inner -->
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <div class="d-flex justify-content-between mb-2 pb-0">
+                                        <div>
+                                            <h2 class="display-2" style="margin-top: 15px;"><strong
+                                                    th:text="${currentTemperature} + '°C'"></strong></h2>
+
+                                            <div><p class="text-muted mb-0"
+                                                    th:text="${currentLocation}"></p>
+                                                <p class="text-muted mb-0"
+                                                   th:text="${currentIconText}"></p>
+                                            </div>
+                                        </div>
+                                        <div th:utext="${currentIcon}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card mb-4" style="border-radius: 25px;">
+                    <div class="card-body p-4">
+
+                        <div id="demo2" class="carousel slide" data-ride="carousel">
+                            <!-- Carousel inner -->
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <div class="d-flex justify-content-around text-center mb-0 pb-0 pt-0">
+                                        <div class="flex-column">
+                                            <strong th:text="${currentHourPlusTwoTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${currentHourPlusTwoIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px"><strong
+                                                    th:text="${currentHourPlusTwo} + ':00'"></strong></p>
+                                        </div>
+                                        <div class="flex-column">
+                                            <p class="small"><strong th:text="${currentHourPlusFourTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${currentHourPlusFourIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px"><strong
+                                                    th:text="${currentHourPlusFour} + ':00'"></strong></p>
+                                        </div>
+                                        <div class="flex-column">
+                                            <p class="small"><strong th:text="${currentHourPlusSixTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${currentHourPlusSixIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px"><strong
+                                                    th:text="${currentHourPlusSix} + ':00'"></strong></p>
+                                        </div>
+                                        <div class="flex-column">
+                                            <p class="small"><strong th:text="${currentHourPlusEightTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${currentHourPlusEightIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px"><strong
+                                                    th:text="${currentHourPlusEight} + ':00'"></strong></p>
+                                        </div>
+                                        <div class="flex-column">
+                                            <p class="small"><strong th:text="${currentPlusTenTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${currentHourPlusTenIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px"><strong
+                                                    th:text="${currentHourPlusTen} + ':00'"></strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card" style="border-radius: 25px;">
+                    <div class="card-body p-4">
+
+                        <div id="demo3" class="carousel slide" data-ride="carousel">
+                            <!-- Carousel inner -->
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <div class="d-flex justify-content-around text-center mb-0 pb-0 pt-0">
+                                        <div class="flex-column">
+                                            <p class="small">
+                                                <strong style="font-size: 16px"
+                                                        th:text="${firstDayTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${firstIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px; font-size: 18px"><strong
+                                                    th:text="${firstDayName}"></strong></p>
+                                        </div>
+                                        <div class="flex-column">
+                                            <p class="small" style="font-size: 16px"><strong
+                                                    th:text="${secondDayTemperature} + '°C'"></strong>
+                                            </p>
+                                            <div th:utext="${secondIcon}"></div>
+                                            <p class="mb-0" style="margin-top: 10px; font-size: 18px"><strong
+                                                    th:text="${secondDayName}"></strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>   <!-- End your project here-->
+
+<!-- MDB -->
+<script
+        type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.umd.min.js"
+></script>
+<!-- Custom scripts -->
+<script type="text/javascript"></script>
+</body>
+</html>

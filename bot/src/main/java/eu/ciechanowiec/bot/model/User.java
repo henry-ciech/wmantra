@@ -1,0 +1,41 @@
+package eu.ciechanowiec.bot.model;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalTime;
+
+@SuppressWarnings("JpaDataSourceORMInspection")
+@Getter
+@Entity
+@Table(name = "user_data")
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+
+    @Id
+    private long chatId;
+    @Column(name = "longitude")
+    private Double longitude;
+    @Column(name = "latitude")
+    private Double latitude;
+    @Column(name = "time", columnDefinition = "TIME WITHOUT TIME ZONE")
+    private LocalTime time;
+    @Column(name = "user_id", length = 255)
+    private String userId;
+    @Column(name = "user_name", length = 255)
+    private String userName;
+
+    @Transient
+    @Getter(AccessLevel.NONE)
+    private boolean isTimeAdjusted = false;
+
+    @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
+    public User(User user, LocalTime time) {
+        this(user.chatId, user.longitude, user.latitude, time,
+                user.userId, user.userName, true);
+    }
+}
