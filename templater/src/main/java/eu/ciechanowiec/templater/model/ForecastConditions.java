@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ConditionsForecast {
+public class ForecastConditions {
 
     private String currentHourPlusTwoCondition;
     private String currentHourPlusFourCondition;

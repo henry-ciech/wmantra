@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ProcessorRegistrar {
+public class ProcessorRegistry {
 
     private final List<Processor> processors;
     private final Processor defaultProcessor;
 
-
     @Autowired
-    public ProcessorRegistrar(List<Processor> processors, Processor defaultProcessor) {
+    public ProcessorRegistry(List<Processor> processors, Processor defaultProcessor) {
         this.processors = new ArrayList<>(processors);
         this.defaultProcessor = defaultProcessor;
     }

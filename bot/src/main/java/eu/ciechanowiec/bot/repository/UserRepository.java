@@ -16,7 +16,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     @SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM user_data WHERE chatId = ?1 AND time IS NOT NULL", nativeQuery = true)
-    boolean existsTime(long chatId);
+    boolean isTimeSpecified(long chatId);
 
 
     @Modifying
@@ -26,7 +26,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     @SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM user_data WHERE chatId = ?1 AND latitude IS NOT NULL AND longitude IS NOT NULL", nativeQuery = true)
-    boolean existsLocation(long chatId);
+    boolean isLocationSpecified(long chatId);
 
     @Modifying
     @Transactional

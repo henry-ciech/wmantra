@@ -3,27 +3,29 @@ package eu.ciechanowiec.bot.processors;
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.ConfigurationStage;
 import eu.ciechanowiec.bot.model.MessageDTO;
-import eu.ciechanowiec.bot.service.ImageService;
+import eu.ciechanowiec.bot.service.ImageSender;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-@Component
+@Service
 public class ShowCurrentWeatherProcessor implements Processor {
 
-    private final ImageService imageService;
+    private final ImageSender imageSender;
     private final TelegramBot telegramBot;
     private final UserService userService;
+    private final Command command;
 
     @Autowired
-    ShowCurrentWeatherProcessor(ImageService imageService, TelegramBot telegramBot, UserService userService) {
+    ShowCurrentWeatherProcessor(ImageSender imageSender, TelegramBot telegramBot, UserService userService) {
         this.userService = userService;
-        this.imageService = imageService;
+        this.imageSender = imageSender;
         this.telegramBot = telegramBot;
+        command = Command.SHOW_CURRENT_WEATHER;
     }
 
     @SneakyThrows
@@ -33,18 +35,18 @@ public class ShowCurrentWeatherProcessor implements Processor {
         Message message = update.getMessage();
         long chatId = message.getChatId();
 
-        ConfigurationStage configurationStage = userService.getConfigurationStage(chatId);
+        ConfigurationStage configurationStage = userService.determinConfigurationStage(chatId);
 
         if (configurationStage == ConfigurationStage.COMPLETED) {
-            imageService.sendImageToTheUser(chatId);
+            imageSender.sendImageToTheUser(chatId);
         } else {
-            MessageDTO changedMessage = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
-            telegramBot.onUpdateReceived(changedMessage);
+            MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
+            telegramBot.onUpdateReceived(messageWithNewType);
         }
     }
 
     @Override
     public Command getCommandType() {
-        return Command.SHOW_CURRENT_WEATHER;
+        return command;
     }
 }

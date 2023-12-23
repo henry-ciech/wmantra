@@ -4,17 +4,17 @@ import eu.ciechanowiec.bot.config.BotConfig;
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.processors.Processor;
-import eu.ciechanowiec.bot.processors.ProcessorRegistrar;
+import eu.ciechanowiec.bot.processors.ProcessorRegistry;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-@Component
+@Service
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
@@ -35,19 +35,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        MessageDTO messageDTO = normalize(update);
+        MessageDTO messageDTO = transformUpdate(update);
         onUpdateReceived(messageDTO);
     }
 
     public void onUpdateReceived(MessageDTO messageDTO) {
-        ProcessorRegistrar processorRegistrar = applicationContext.getBean(ProcessorRegistrar.class);
+        ProcessorRegistry processorRegistry = applicationContext.getBean(ProcessorRegistry.class);
         Command command = messageDTO.command();
 
-        Processor processor = processorRegistrar.getProcessor(command);
+        Processor processor = processorRegistry.getProcessor(command);
         processor.process(messageDTO);
     }
 
-    private MessageDTO normalize(Update update) {
+    private MessageDTO transformUpdate(Update update) {
         Message message = update.getMessage();
         Command command = Command.of(message);
 

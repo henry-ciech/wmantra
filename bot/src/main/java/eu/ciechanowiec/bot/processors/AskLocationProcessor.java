@@ -6,20 +6,22 @@ import eu.ciechanowiec.bot.utils.MessageTemplater;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-@Component
+@Service
 public class AskLocationProcessor implements Processor {
 
     private final TelegramBot telegramBot;
     private final MessageTemplater messageTemplater;
+    private final Command command;
 
     @Autowired
     AskLocationProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
         this.telegramBot = telegramBot;
         this.messageTemplater = messageTemplater;
+        command = Command.ASK_LOCATION;
     }
 
     @SneakyThrows
@@ -37,6 +39,6 @@ public class AskLocationProcessor implements Processor {
 
     @Override
     public Command getCommandType() {
-        return Command.ASK_LOCATION;
+        return command;
     }
 }

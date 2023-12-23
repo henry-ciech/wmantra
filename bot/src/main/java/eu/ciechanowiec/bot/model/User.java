@@ -18,15 +18,20 @@ public class User {
 
     @Id
     private long chatId;
+
     @Column(name = "longitude")
     private Double longitude;
+
     @Column(name = "latitude")
     private Double latitude;
+
     @Column(name = "time", columnDefinition = "TIME WITHOUT TIME ZONE")
     private LocalTime time;
-    @Column(name = "user_id", length = 255)
+
+    @Column(name = "user_id")
     private String userId;
-    @Column(name = "user_name", length = 255)
+
+    @Column(name = "user_name")
     private String userName;
 
     @Transient

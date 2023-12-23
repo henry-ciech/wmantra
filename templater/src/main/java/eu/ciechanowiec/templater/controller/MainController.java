@@ -1,41 +1,50 @@
 package eu.ciechanowiec.templater.controller;
 
 import eu.ciechanowiec.templater.model.*;
-import eu.ciechanowiec.templater.service.ForecastTimeDayGetter;
+import eu.ciechanowiec.templater.service.UpcomingTimeAndDayCalculator;
 import eu.ciechanowiec.templater.service.HtmlTagCreator;
-import eu.ciechanowiec.templater.service.WeatherLocationService;
+import eu.ciechanowiec.templater.service.WeatherLocationRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Controller
 @Slf4j
-public class MainController {
+public class MainController implements ErrorController {
 
     private final HtmlTagCreator htmlTagCreator;
-    private final ForecastTimeDayGetter forecastTimeDayGetter;
-    private final WeatherLocationService weatherLocationService;
+    private final UpcomingTimeAndDayCalculator upcomingTimeAndDayCalculator;
+    private final WeatherLocationRetriever weatherLocationRetriever;
     private static final String SMALL_SIZE = "small";
     private static final String BIG_SIZE = "big";
+    private static final String ERROR_HTML = "error";
 
     @Autowired
-    MainController(HtmlTagCreator htmlTagCreator, ForecastTimeDayGetter forecastTimeDayGetter,
-                   WeatherLocationService weatherLocationService) {
-        this.forecastTimeDayGetter = forecastTimeDayGetter;
+    MainController(HtmlTagCreator htmlTagCreator, WeatherLocationRetriever weatherLocationRetriever) {
+        upcomingTimeAndDayCalculator = new UpcomingTimeAndDayCalculator();
         this.htmlTagCreator = htmlTagCreator;
-        this.weatherLocationService = weatherLocationService;
+        this.weatherLocationRetriever = weatherLocationRetriever;
+    }
+
+    @RequestMapping("/error")
+    public ModelAndView handleError() {
+        return new ModelAndView(ERROR_HTML);
     }
 
     @SuppressWarnings({"java:S2221", "CatchAndPrintStackTrace", "OverlyBroadCatchBlock"})
     @GetMapping("/")
     public String index(@RequestParam double longitude, @RequestParam double latitude, Model model) {
         try {
-            WeatherData weatherData = weatherLocationService.getWeather(longitude, latitude);
+            WeatherData weatherData = weatherLocationRetriever.retrieve(longitude, latitude);
 
             addIconsData(model, weatherData);
             addCurrentData(model, weatherData);
@@ -45,27 +54,27 @@ public class MainController {
             return "index";
         } catch (Exception exception) {
             log.error("Service unavailable due to an exception", exception);
-            return "error";
+            return ERROR_HTML;
         }
     }
 
     private void addIconsData(Model model, WeatherData weatherData) {
-        ForecastWeather forecastWeather = weatherData.getForecastWeather();
-        ConditionsForecast conditionsForecast = forecastWeather.getConditionsForecast();
+        ForecastWeatherData forecastWeatherData = weatherData.forecastWeatherData();
+        ForecastConditions forecastConditions = forecastWeatherData.forecastConditions();
 
         String currentHourPlusTwoIcon =
-                htmlTagCreator.getSubTag(conditionsForecast.getCurrentHourPlusTwoCondition(), SMALL_SIZE);
+                htmlTagCreator.createSubTag(forecastConditions.getCurrentHourPlusTwoCondition(), SMALL_SIZE);
         String currentHourPlusFourIcon =
-                htmlTagCreator.getSubTag(conditionsForecast.getCurrentHourPlusFourCondition(), SMALL_SIZE);
+                htmlTagCreator.createSubTag(forecastConditions.getCurrentHourPlusFourCondition(), SMALL_SIZE);
         String currentHourPlusSixIcon =
-                htmlTagCreator.getSubTag(conditionsForecast.getCurrentHourPlusSixCondition(), SMALL_SIZE);
+                htmlTagCreator.createSubTag(forecastConditions.getCurrentHourPlusSixCondition(), SMALL_SIZE);
         String currentHourPlusEightIcon =
-                htmlTagCreator.getSubTag(conditionsForecast.getCurrentHourPlusEightCondition(), SMALL_SIZE);
+                htmlTagCreator.createSubTag(forecastConditions.getCurrentHourPlusEightCondition(), SMALL_SIZE);
         String currentHourPlusTenIcon =
-                htmlTagCreator.getSubTag(conditionsForecast.getCurrentHourPlusTenCondition(), SMALL_SIZE);
+                htmlTagCreator.createSubTag(forecastConditions.getCurrentHourPlusTenCondition(), SMALL_SIZE);
 
-        String firstDayIcon = htmlTagCreator.getSubTag(conditionsForecast.getFirstDayCondition(), BIG_SIZE);
-        String secondDayIcon = htmlTagCreator.getSubTag(conditionsForecast.getSecondDayCondition(), BIG_SIZE);
+        String firstDayIcon = htmlTagCreator.createSubTag(forecastConditions.getFirstDayCondition(), BIG_SIZE);
+        String secondDayIcon = htmlTagCreator.createSubTag(forecastConditions.getSecondDayCondition(), BIG_SIZE);
 
         model.addAttribute("currentHourPlusTwoIcon", currentHourPlusTwoIcon);
         model.addAttribute("currentHourPlusFourIcon", currentHourPlusFourIcon);
@@ -78,25 +87,26 @@ public class MainController {
     }
 
     private void addCurrentData(Model model, WeatherData weatherData) {
-        CurrentWeatherData currentWeatherData = weatherData.getCurrentWeatherData();
-        String currentDayIcon = htmlTagCreator.getMainTag(currentWeatherData.getCurrentCondition());
+        CurrentWeatherData currentWeatherData = weatherData.currentWeatherData();
+        String currentDayIcon = htmlTagCreator.createMainTag(currentWeatherData.currentCondition());
 
-        model.addAttribute("currentLocation", currentWeatherData.getCurrentLocation());
-        model.addAttribute("currentTemperature", currentWeatherData.getCurrentTemperature());
-        model.addAttribute("currentIconText", currentWeatherData.getCurrentCondition());
+        model.addAttribute("currentLocation", currentWeatherData.currentLocation());
+        model.addAttribute("currentTemperature", currentWeatherData.currentTemperature());
+        model.addAttribute("currentIconText", currentWeatherData.currentCondition());
         model.addAttribute("currentIcon", currentDayIcon);
     }
 
     private void addNextDaysData(Model model, WeatherData weatherData) {
-        CurrentWeatherData currentWeatherData = weatherData.getCurrentWeatherData();
+        CurrentWeatherData currentWeatherData = weatherData.currentWeatherData();
 
-        String currentDay = currentWeatherData.getCurrentDay();
-        String[] days = forecastTimeDayGetter.getNextTwoDays(currentDay);
-        ForecastWeather forecastWeather = weatherData.getForecastWeather();
-        TemperaturesForecast temperaturesForecast = forecastWeather.getTemperaturesForecast();
+        String currentDay = currentWeatherData.currentDay();
+        DayOfWeek day = DayOfWeek.valueOf(currentDay.toUpperCase());
+        String[] days = upcomingTimeAndDayCalculator.calculateNextTwoDays(day);
+        ForecastWeatherData forecastWeatherData = weatherData.forecastWeatherData();
+        ForecastTemperatures forecastTemperatures = forecastWeatherData.forecastTemperatures();
 
-        String firstDayTemperature = temperaturesForecast.getFirstDayTemperature();
-        String secondDayTemperature = temperaturesForecast.getSecondDayTemperature();
+        String firstDayTemperature = forecastTemperatures.getFirstDayTemperature();
+        String secondDayTemperature = forecastTemperatures.getSecondDayTemperature();
 
         double firstDayTemp = Double.parseDouble(firstDayTemperature);
         double secondDayTemp = Double.parseDouble(secondDayTemperature);
@@ -111,22 +121,22 @@ public class MainController {
     }
 
     private void addNextHoursData(Model model, WeatherData weatherData) {
-        CurrentWeatherData currentWeatherData = weatherData.getCurrentWeatherData();
-        LocalTime currentTime = currentWeatherData.getCurrentTime();
+        CurrentWeatherData currentWeatherData = weatherData.currentWeatherData();
+        LocalTime currentTime = currentWeatherData.currentTime();
 
-        int[] hours = forecastTimeDayGetter.getNextTenHours(currentTime);
-        ForecastWeather forecastWeather = weatherData.getForecastWeather();
-        TemperaturesForecast temperaturesForecast = forecastWeather.getTemperaturesForecast();
+        int[] hours = upcomingTimeAndDayCalculator.calculateNextTenHours(currentTime);
+        ForecastWeatherData forecastWeatherData = weatherData.forecastWeatherData();
+        ForecastTemperatures forecastTemperatures = forecastWeatherData.forecastTemperatures();
 
         model.addAttribute("currentHourPlusTwo", hours[0]);
         model.addAttribute("currentHourPlusFour", hours[1]);
         model.addAttribute("currentHourPlusSix", hours[2]);
         model.addAttribute("currentHourPlusEight", hours[3]);
         model.addAttribute("currentHourPlusTen", hours[4]);
-        model.addAttribute("currentHourPlusTwoTemperature", temperaturesForecast.getCurrentHourPlusTwoTemperature());
-        model.addAttribute("currentHourPlusFourTemperature", temperaturesForecast.getCurrentHourPlusFourTemperature());
-        model.addAttribute("currentHourPlusSixTemperature", temperaturesForecast.getCurrentHourPlusSixTemperature());
-        model.addAttribute("currentHourPlusEightTemperature", temperaturesForecast.getCurrentHourPlusEightTemperature());
-        model.addAttribute("currentPlusTenTemperature", temperaturesForecast.getCurrentHourPlusTenTemperature());
+        model.addAttribute("currentHourPlusTwoTemperature", forecastTemperatures.getCurrentHourPlusTwoTemperature());
+        model.addAttribute("currentHourPlusFourTemperature", forecastTemperatures.getCurrentHourPlusFourTemperature());
+        model.addAttribute("currentHourPlusSixTemperature", forecastTemperatures.getCurrentHourPlusSixTemperature());
+        model.addAttribute("currentHourPlusEightTemperature", forecastTemperatures.getCurrentHourPlusEightTemperature());
+        model.addAttribute("currentPlusTenTemperature", forecastTemperatures.getCurrentHourPlusTenTemperature());
     }
 }

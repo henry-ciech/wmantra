@@ -5,22 +5,24 @@ import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-@Component
+@Service
 class UnknownProcessor implements Processor {
 
     private final TelegramBot telegramBot;
     private final MessageTemplater messageTemplater;
+    private final Command command;
 
     @Autowired
     UnknownProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
         this.telegramBot = telegramBot;
         this.messageTemplater = messageTemplater;
+        command = Command.UNKNOWN;
     }
 
     @SneakyThrows
@@ -30,21 +32,21 @@ class UnknownProcessor implements Processor {
         Message message = update.getMessage();
         long chatId = message.getChatId();
 
-        sendIncorrectMessageNotify(chatId, messageDTO);
+        sendErrorMessage(chatId, messageDTO);
+    }
+
+    @SneakyThrows
+    private void sendErrorMessage(long chatId, MessageDTO messageDTO) {
+        String messageToPrint = messageTemplater.getErrorMessage();
+        String chatIdStr = String.valueOf(chatId);
+        SendMessage sendMessage = new SendMessage(chatIdStr, messageToPrint);
+        telegramBot.execute(sendMessage);
+        MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
+        telegramBot.onUpdateReceived(messageWithNewType);
     }
 
     @Override
     public Command getCommandType() {
-        return Command.UNKNOWN;
-    }
-
-    @SneakyThrows
-    private void sendIncorrectMessageNotify(long chatId, MessageDTO messageDTO) {
-        String messageToPrint = messageTemplater.getIncorrectMessageNotification();
-        String chatIdStr = String.valueOf(chatId);
-        SendMessage sendMessage = new SendMessage(chatIdStr, messageToPrint);
-        telegramBot.execute(sendMessage);
-        MessageDTO changedMessage = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
-        telegramBot.onUpdateReceived(changedMessage);
+        return command;
     }
 }

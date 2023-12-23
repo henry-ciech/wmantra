@@ -7,23 +7,25 @@ import eu.ciechanowiec.bot.service.UserService;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-@Component
+@Service
 public class StartProcessor implements Processor {
 
     private final TelegramBot telegramBot;
     private final UserService userService;
     private final MessageTemplater messageTemplater;
+    private final Command command;
 
     @Autowired
     StartProcessor(TelegramBot telegramBot, UserService userService, MessageTemplater messageTemplater) {
         this.telegramBot = telegramBot;
         this.userService = userService;
         this.messageTemplater = messageTemplater;
+        command = Command.START;
     }
 
     @SneakyThrows
@@ -43,16 +45,16 @@ public class StartProcessor implements Processor {
         if (!userService.isUserExists(chatId)) {
             userService.createUserWithChatIdAndUserInfo(chatId, userId, userName);
 
-            MessageDTO changedMessage = messageDTO.withNewMessageType(Command.ASK_LOCATION);
-            telegramBot.onUpdateReceived(changedMessage);
+            MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.ASK_LOCATION);
+            telegramBot.onUpdateReceived(messageWithNewType);
         } else {
-            MessageDTO changedMessage = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
-            telegramBot.onUpdateReceived(changedMessage);
+            MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
+            telegramBot.onUpdateReceived(messageWithNewType);
         }
     }
 
     @Override
     public Command getCommandType() {
-        return Command.START;
+        return command;
     }
 }

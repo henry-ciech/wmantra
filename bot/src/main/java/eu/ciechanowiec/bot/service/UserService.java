@@ -5,15 +5,18 @@ import eu.ciechanowiec.bot.model.User;
 import eu.ciechanowiec.bot.repository.UserRepository;
 import net.iakovlev.timeshape.TimeZoneEngine;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@Component
+@Service
 public class UserService {
 
     private final UserRepository userRepository;
@@ -27,7 +30,7 @@ public class UserService {
         return offsetTime.toLocalTime();
     }
 
-    public User getUser(long chatId) {
+    public User findUser(long chatId) {
         return userRepository.findUser(chatId);
     }
 
@@ -35,15 +38,11 @@ public class UserService {
         return userRepository.isUserExists(chatId);
     }
 
-    private void updateLocation(long chatId, double latitude, double longitude) {
-        userRepository.updateLocation(chatId, latitude, longitude);
-    }
-
-    public Double getLatitude(long chatId) {
+    public Double findLatitude(long chatId) {
         return userRepository.findLatitude(chatId);
     }
 
-    public Double getLongitude(long chatId) {
+    public Double findLongitude(long chatId) {
         return userRepository.findLongitude(chatId);
     }
 
@@ -51,23 +50,19 @@ public class UserService {
         userRepository.createUserWithChatIdAndUserInfo(chatId, userId, userName);
     }
 
-    public boolean isTimeExists(long chatId) {
-        return userRepository.existsTime(chatId);
+    public boolean isTimeSpecified(long chatId) {
+        return userRepository.isTimeSpecified(chatId);
     }
 
-    public boolean isLocationExists(long chatId) {
-        return userRepository.existsLocation(chatId);
-    }
-
-    public void updateTime(long chatId, LocalTime time) {
-        userRepository.updateTime(chatId, time);
+    public boolean isLocationSpecified(long chatId) {
+        return userRepository.isLocationSpecified(chatId);
     }
 
     public void saveTime(Update update) {
         Message message = update.getMessage();
         long chatId = message.getChatId();
-        double longitude = getLongitude(chatId);
-        double latitude = getLatitude(chatId);
+        double longitude = findLongitude(chatId);
+        double latitude = findLatitude(chatId);
         String text = message.getText();
 
         ZoneOffset zoneOffset = getTimeZone(longitude, latitude);
@@ -78,15 +73,17 @@ public class UserService {
         updateTime(chatId, timeToSave);
     }
 
-    public ConfigurationStage getConfigurationStage(long chatId) {
-        if (!isLocationExists(chatId)) {
+    public void updateTime(long chatId, LocalTime time) {
+        userRepository.updateTime(chatId, time);
+    }
+
+    public ConfigurationStage determinConfigurationStage(long chatId) {
+        if (!isLocationSpecified(chatId)) {
             return ConfigurationStage.NO_LOCATION_AND_TIME;
         }
 
-        boolean timeExistsForChatId = isTimeExists(chatId);
-        return timeExistsForChatId
-                ? ConfigurationStage.COMPLETED
-                : ConfigurationStage.NO_TIME;
+        boolean isTimeSpecifiedForChatId = isTimeSpecified(chatId);
+        return isTimeSpecifiedForChatId ? ConfigurationStage.COMPLETED : ConfigurationStage.NO_TIME;
     }
 
     public void saveLocation(Update update) {
@@ -96,7 +93,7 @@ public class UserService {
         double latitude = location.getLatitude();
         long chatId = message.getChatId();
 
-        updateLocation(chatId, latitude, longitude);
+        userRepository.updateLocation(chatId, latitude, longitude);
     }
 
     public ZoneOffset getTimeZone(double longitude, double latitude) {
@@ -107,15 +104,10 @@ public class UserService {
         return now.getOffset();
     }
 
-    private OffsetTime getTimeToSave(String text, ZoneOffset zoneOffset) {
-        String[] hourAndMinute = text.split(":");
+    private OffsetTime getTimeToSave(CharSequence text, ZoneOffset zoneOffset) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm").withZone(zoneOffset);
 
-        String hourStr = hourAndMinute[0];
-        String minuteStr = hourAndMinute[1];
-        int hour = Integer.parseInt(hourStr);
-        int minute = Integer.parseInt(minuteStr);
-
-        OffsetTime offsetTime = OffsetTime.of(hour, minute, 0, 0, zoneOffset);
-        return offsetTime.withOffsetSameInstant(ZoneOffset.of("+00:00"));
+        OffsetTime offsetTime = OffsetTime.parse(text, formatter);
+        return offsetTime.withOffsetSameInstant(ZoneOffset.UTC);
     }
 }

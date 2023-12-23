@@ -6,19 +6,21 @@ import eu.ciechanowiec.bot.service.TelegramBot;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-@Component
+@Service
 class DefaultProcessor implements Processor {
 
     private final ApplicationContext applicationContext;
+    private final Command command;
 
     @Autowired
     DefaultProcessor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        command = Command.DEFAULT;
     }
 
     @SneakyThrows
@@ -35,6 +37,6 @@ class DefaultProcessor implements Processor {
 
     @Override
     public Command getCommandType() {
-        return Command.DEFAULT;
+        return command;
     }
 }

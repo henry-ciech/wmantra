@@ -1,18 +1,16 @@
 package eu.ciechanowiec.templater.service;
 
-import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
-@Component
-public class ForecastTimeDayGetter {
+public class UpcomingTimeAndDayCalculator {
 
     private static final int HOURS_IN_DAY = 24;
 
-    public int[] getNextTenHours(LocalTime localTime) {
+    public int[] calculateNextTenHours(LocalTime localTime) {
         int hour = localTime.getHour();
 
         int[] nextHours = new int[5];
@@ -25,8 +23,7 @@ public class ForecastTimeDayGetter {
         return nextHours;
     }
 
-    public String[] getNextTwoDays(String currentDay) {
-        DayOfWeek day = DayOfWeek.valueOf(currentDay.toUpperCase());
+    public String[] calculateNextTwoDays(DayOfWeek day) {
 
         String[] nextDays = new String[2];
 

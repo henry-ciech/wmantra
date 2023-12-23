@@ -10,7 +10,7 @@ import lombok.SneakyThrows;
 import net.iakovlev.timeshape.TimeZoneEngine;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -19,18 +19,20 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.time.*;
 import java.util.Optional;
 
-@Component
+@Service
 class SaveLocationProcessor implements Processor {
 
     private final TelegramBot telegramBot;
     private final UserService userService;
     private final MessageTemplater messageTemplater;
+    private final Command command;
 
     @Autowired
     SaveLocationProcessor(TelegramBot telegramBot, UserService userService, MessageTemplater messageTemplater) {
         this.telegramBot = telegramBot;
         this.userService = userService;
         this.messageTemplater = messageTemplater;
+        command = Command.SAVE_LOCATION;
     }
 
     @SneakyThrows
@@ -40,24 +42,24 @@ class SaveLocationProcessor implements Processor {
         Message message = update.getMessage();
         long chatId = message.getChatId();
 
-        boolean timeExists = userService.isTimeExists(chatId);
-        if (timeExists) {
-            handleIfTimeExists(messageDTO);
+        boolean timeSpecified = userService.isTimeSpecified(chatId);
+        if (timeSpecified) {
+            processForTimeSpecified(messageDTO);
         } else {
             userService.saveLocation(update);
-            MessageDTO changedMessage = messageDTO.withNewMessageType(Command.ASK_TIME);
-            telegramBot.onUpdateReceived(changedMessage);
+            MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.ASK_TIME);
+            telegramBot.onUpdateReceived(messageWithNewType);
         }
     }
 
     @SneakyThrows
-    private void handleIfTimeExists(MessageDTO messageDTO) {
+    private void processForTimeSpecified(MessageDTO messageDTO) {
         Update update = messageDTO.update();
         Message message = update.getMessage();
         long chatId = message.getChatId();
         String chatIdStr = String.valueOf(chatId);
 
-        LocalTime localTimeToSave = adjustTime(message);
+        LocalTime localTimeToSave = adjustTimeToLocation(message);
 
         userService.saveLocation(update);
         userService.updateTime(chatId, localTimeToSave);
@@ -67,23 +69,22 @@ class SaveLocationProcessor implements Processor {
         SendMessage sendMessage = new SendMessage(chatIdStr, messageToSend);
         telegramBot.execute(sendMessage);
 
-
-        MessageDTO changedMessage = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
-        telegramBot.onUpdateReceived(changedMessage);
+        MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);
+        telegramBot.onUpdateReceived(messageWithNewType);
     }
 
     @Override
     public Command getCommandType() {
-        return Command.SAVE_LOCATION;
+        return command;
     }
 
-    //adjusts time to the new user's time zone
-    private LocalTime adjustTime(Message message) {
+    //adjusts time to the new user's location
+    private LocalTime adjustTimeToLocation(Message message) {
         long chatId = message.getChatId();
 
-        User user = userService.getUser(chatId);
-        double originalLongitude = userService.getLongitude(chatId);
-        double originalLatitude = userService.getLatitude(chatId);
+        User user = userService.findUser(chatId);
+        double originalLongitude = userService.findLongitude(chatId);
+        double originalLatitude = userService.findLatitude(chatId);
         ZoneOffset originalOffset = resolveTimeZone(originalLongitude, originalLatitude);
         LocalTime time = user.getTime();
         OffsetTime originalOffsetTimeUtc0 = OffsetTime.of(time, ZoneOffset.UTC);

@@ -1,11 +1,12 @@
 package eu.ciechanowiec.templater.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@SuppressWarnings("ClassCanBeRecord")
-@Data
-public class WeatherCondition {
+@ToString
+@Getter
+public final class WeatherCondition {
 
-    private final String name;
-    private final String color;
+    private String iconName;
+    private String customColor;
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class TemperaturesForecast {
+public class ForecastTemperatures {
 
     private String currentHourPlusTwoTemperature;
     private String currentHourPlusFourTemperature;

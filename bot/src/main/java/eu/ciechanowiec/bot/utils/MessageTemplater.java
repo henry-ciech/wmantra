@@ -3,12 +3,15 @@ package eu.ciechanowiec.bot.utils;
 
 import eu.ciechanowiec.bot.model.LocationData;
 import eu.ciechanowiec.bot.model.User;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 
-@Component
+@Service
 public class MessageTemplater {
+
+    public static final String SHOW_CURRENT_SETTINGS_BUTTON_TEXT = "🌥 Show current weather";
+    public static final String CONFIGURE_BUTTON_TEXT = "⚙️ Configure";
 
     public String getGreetMessage(String userName) {
         return String.format("""
@@ -18,7 +21,7 @@ public class MessageTemplater {
                 """, userName);
     }
 
-    public String getWhenGettingMessage(LocationData locationData, User user) {
+    public String getWhenNextReports(LocationData locationData, User user) {
         LocalTime time = user.getTime();
         String timeStr = time.toString();
         return String.format("""
@@ -33,7 +36,7 @@ public class MessageTemplater {
                 """;
     }
 
-    public String getIncorrectMessageNotification() {
+    public String getErrorMessage() {
         return "I didn't understand that message 🤔 Please try again with a supported message type.";
     }
 

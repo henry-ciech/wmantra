@@ -1,8 +1,8 @@
 package eu.ciechanowiec.templater.service;
 
+import eu.ciechanowiec.templater.model.HtmlData;
 import eu.ciechanowiec.templater.model.WeatherCondition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -11,46 +11,44 @@ import java.util.Map;
 public class HtmlTagCreator {
 
     private final JsonParser jsonParser;
-    private final String filePath;
 
     @Autowired
-    public HtmlTagCreator(JsonParser jsonParser, @Value("${file.path}") String filePath) {
-        this.filePath = filePath;
+    public HtmlTagCreator(JsonParser jsonParser) {
         this.jsonParser = jsonParser;
     }
 
-    public String getMainTag(String conditionFromRequest) {
-        Map<String, WeatherCondition> conditions = jsonParser.parseConditionsFromHtmlMap(filePath);
-        Map<String, String> configData = jsonParser.parseConfigDataFromHtmlMap(filePath);
+    public String createMainTag(String conditionFromRequest) {
+        HtmlData htmlData = jsonParser.createHtmlData();
+        Map<String, WeatherCondition> conditions = htmlData.getConditionMappings();
 
         WeatherCondition weatherCondition = conditions.get(conditionFromRequest);
 
-        String tagTemplate = configData.get("htmlTemplate");
-        String iconName = weatherCondition.getName();
-        String iconColor = weatherCondition.getColor();
-        String size = configData.get("mainIconSize");
-        String marginTop = configData.get("mainMarginTop");
+        String tagTemplate = htmlData.getHtmlTemplate();
+        String iconName = weatherCondition.getIconName();
+        String iconColor = weatherCondition.getCustomColor();
+        String size = htmlData.getBigIconSize();
+        String marginTop = htmlData.getMainMarginTop();
 
         return processTemplate(tagTemplate, iconName, iconColor, size, marginTop);
     }
 
-    public String getSubTag(String conditionFromRequest, String sizeFromJson) {
-        Map<String, WeatherCondition> conditions = jsonParser.parseConditionsFromHtmlMap(filePath);
-        Map<String, String> constants = jsonParser.parseConfigDataFromHtmlMap(filePath);
+    public String createSubTag(String conditionFromRequest, String sizeFromJson) {
+        HtmlData htmlData = jsonParser.createHtmlData();
+        Map<String, WeatherCondition> conditions = htmlData.getConditionMappings();
 
         WeatherCondition weatherCondition = conditions.get(conditionFromRequest);
-        String iconName = weatherCondition.getName();
-        String iconColor = constants.get("defaultColor");
+        String iconName = weatherCondition.getIconName();
+        String iconColor = htmlData.getDefaultColor();
         String size;
 
         if (sizeFromJson.equals("big")) {
-            size = constants.get("bigIconSize");
+            size = htmlData.getBigIconSize();
         } else {
-            size = constants.get("smallIconSize");
+            size = htmlData.getSmallIconSize();
         }
 
-        String tagTemplate = constants.get("htmlTemplate");
-        String marginTop = constants.get("subMarginTop");
+        String tagTemplate = htmlData.getHtmlTemplate();
+        String marginTop = htmlData.getSubMarginTop();
 
         return processTemplate(tagTemplate, iconName, iconColor, size, marginTop);
     }
