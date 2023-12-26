@@ -15,6 +15,13 @@
     <version>1.0.0</version>
 
     <inceptionYear>2023</inceptionYear>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <name>bot</name>
     <description>Java Program</description>
     <url>https://ciechanowiec.eu/</url>

@@ -19,9 +19,9 @@ class ConfigProcessor implements Processor {
     private final Command command;
 
     @Autowired
-    ConfigProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
+    ConfigProcessor(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
-        this.messageTemplater = messageTemplater;
+        this.messageTemplater = new MessageTemplater();
         command = Command.CONFIG;
     }
 

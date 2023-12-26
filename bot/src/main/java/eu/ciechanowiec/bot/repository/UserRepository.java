@@ -18,7 +18,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END FROM user_data WHERE chatId = ?1 AND time IS NOT NULL", nativeQuery = true)
     boolean isTimeSpecified(long chatId);
 
-
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO user_data (chatId, user_id, user_name) VALUES (?1, ?2, ?3)", nativeQuery = true)

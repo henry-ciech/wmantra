@@ -28,6 +28,7 @@ public class ShowCurrentWeatherProcessor implements Processor {
         command = Command.SHOW_CURRENT_WEATHER;
     }
 
+
     @SneakyThrows
     @Override
     public void process(MessageDTO messageDTO) {

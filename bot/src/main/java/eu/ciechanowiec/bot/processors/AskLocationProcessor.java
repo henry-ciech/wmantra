@@ -18,9 +18,9 @@ public class AskLocationProcessor implements Processor {
     private final Command command;
 
     @Autowired
-    AskLocationProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
+    AskLocationProcessor(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
-        this.messageTemplater = messageTemplater;
+        this.messageTemplater = new MessageTemplater();
         command = Command.ASK_LOCATION;
     }
 

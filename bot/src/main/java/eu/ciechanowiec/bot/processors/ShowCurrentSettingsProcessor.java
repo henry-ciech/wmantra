@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -94,8 +95,8 @@ class ShowCurrentSettingsProcessor implements Processor {
     private String prepareMessageTextToSend(User user) {
         Double latitude = user.getLatitude();
         Double longitude = user.getLongitude();
-        LocationData locationData = locationRetriever.retrieveLocationData(latitude, longitude);
-        return messageTemplater.getWhenNextReports(locationData, user);
+        Location location = locationRetriever.retrieveLocationData(latitude, longitude);
+        return messageTemplater.getWhenNextReports(location, user);
     }
 
     private SendMessage createSendMessage(Long chatId, String messageText) {
@@ -103,6 +104,7 @@ class ShowCurrentSettingsProcessor implements Processor {
         SendMessage sendMessage = new SendMessage(chatIdStr, messageText);
         sendMessage.setParseMode(ParseMode.MARKDOWN);
         sendMessage.setReplyMarkup(createReplyKeyboardMarkup());
+
         return sendMessage;
     }
 

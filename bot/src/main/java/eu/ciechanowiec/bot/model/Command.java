@@ -14,15 +14,15 @@ import java.util.regex.Pattern;
 public enum Command {
 
     START(List.of("/start"), true),
-    ASK_LOCATION(List.of("/askLocation"), false),
-    ASK_TIME(List.of("/askTime"), false),
     CONFIG(List.of("/config", MessageTemplater.CONFIGURE_BUTTON_TEXT), true),
-    UNKNOWN(List.of("/unknown"), false),
-    SAVE_LOCATION(List.of("/saveLocation"), false),
-    SAVE_TIME(List.of("/saveTime"), false),
     SHOW_CURRENT_SETTINGS(List.of("/showCurrentSettings"), true),
     SHOW_CURRENT_WEATHER(List.of("/showCurrentWeather", MessageTemplater.SHOW_CURRENT_SETTINGS_BUTTON_TEXT),
             true),
+    ASK_LOCATION(List.of("/askLocation"), false),
+    ASK_TIME(List.of("/askTime"), false),
+    UNKNOWN(List.of("/unknown"), false),
+    SAVE_LOCATION(List.of("/saveLocation"), false),
+    SAVE_TIME(List.of("/saveTime"), false),
     DEFAULT(List.of("/default"), false);
 
     private final List<String> messageTexts;

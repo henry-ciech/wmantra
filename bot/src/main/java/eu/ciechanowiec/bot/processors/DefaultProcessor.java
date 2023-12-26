@@ -3,35 +3,37 @@ package eu.ciechanowiec.bot.processors;
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
+import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
 class DefaultProcessor implements Processor {
 
-    private final ApplicationContext applicationContext;
     private final Command command;
+    private final MessageTemplater messageTemplater;
+    private final TelegramBot telegramBot;
 
     @Autowired
-    DefaultProcessor(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    DefaultProcessor(TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
         command = Command.DEFAULT;
+        this.messageTemplater = new MessageTemplater();
     }
 
     @SneakyThrows
     @Override
     public void process(MessageDTO messageDTO) {
-        TelegramBot telegramBot = applicationContext.getBean(TelegramBot.class);
-        Update update = messageDTO.update();
-        Message message = update.getMessage();
+        Message message = messageDTO.getMessage();
+
         Long chatId = message.getChatId();
+        String errorMessage = messageTemplater.getErrorMessage();
+        String chatIdStr = String.valueOf(chatId);
         SendMessage sendMessage
-                = new SendMessage(String.valueOf(chatId), "Something went wrong, try later");
+                = new SendMessage(chatIdStr, errorMessage);
         telegramBot.execute(sendMessage);
     }
 

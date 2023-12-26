@@ -13,8 +13,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class UserService {

@@ -18,9 +18,9 @@ class AskTimeProcessor implements Processor {
     private final Command command;
 
     @Autowired
-    AskTimeProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
+    AskTimeProcessor(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
-        this.messageTemplater = messageTemplater;
+        this.messageTemplater = new MessageTemplater();
         command = Command.ASK_TIME;
     }
 

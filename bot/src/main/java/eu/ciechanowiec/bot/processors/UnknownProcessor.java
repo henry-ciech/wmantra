@@ -19,9 +19,9 @@ class UnknownProcessor implements Processor {
     private final Command command;
 
     @Autowired
-    UnknownProcessor(TelegramBot telegramBot, MessageTemplater messageTemplater) {
+    UnknownProcessor(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
-        this.messageTemplater = messageTemplater;
+        this.messageTemplater = new MessageTemplater();
         command = Command.UNKNOWN;
     }
 

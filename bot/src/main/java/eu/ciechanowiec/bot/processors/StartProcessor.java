@@ -21,10 +21,10 @@ public class StartProcessor implements Processor {
     private final Command command;
 
     @Autowired
-    StartProcessor(TelegramBot telegramBot, UserService userService, MessageTemplater messageTemplater) {
+    StartProcessor(TelegramBot telegramBot, UserService userService) {
         this.telegramBot = telegramBot;
         this.userService = userService;
-        this.messageTemplater = messageTemplater;
+        this.messageTemplater = new MessageTemplater();
         command = Command.START;
     }
 

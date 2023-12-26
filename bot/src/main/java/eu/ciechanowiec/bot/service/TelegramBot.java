@@ -8,13 +8,16 @@ import eu.ciechanowiec.bot.processors.ProcessorRegistry;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
+@Primary
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
@@ -25,6 +28,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         super(options, botConfig.getToken());
         this.botConfig = botConfig;
         this.applicationContext = applicationContext;
+        System.out.println();
     }
 
     @Override
@@ -39,11 +43,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         onUpdateReceived(messageDTO);
     }
 
+    @SneakyThrows
     public void onUpdateReceived(MessageDTO messageDTO) {
         ProcessorRegistry processorRegistry = applicationContext.getBean(ProcessorRegistry.class);
         Command command = messageDTO.command();
 
         Processor processor = processorRegistry.getProcessor(command);
+        processor.getCommandType();
         processor.process(messageDTO);
     }
 

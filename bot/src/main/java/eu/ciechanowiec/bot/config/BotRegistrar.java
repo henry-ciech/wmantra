@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.meta.generics.LongPollingBot;
 import org.telegram.telegrambots.meta.generics.TelegramBot;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -22,8 +23,8 @@ class BotRegistrar {
 
     @SneakyThrows
     @EventListener({ContextRefreshedEvent.class})
-    public void init() {
+    public BotSession init() {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        telegramBotsApi.registerBot((LongPollingBot) bot);
+        return telegramBotsApi.registerBot((LongPollingBot) bot);
     }
 }

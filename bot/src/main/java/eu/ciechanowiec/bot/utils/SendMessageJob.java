@@ -14,8 +14,7 @@ public class SendMessageJob implements Job {
         JobDataMap mergedJobDataMap = context.getMergedJobDataMap();
         long chatId = mergedJobDataMap.getLong("chatId");
         Scheduler scheduler = context.getScheduler();
-        SchedulerContext schedulerContext = scheduler
-                .getContext();
+        SchedulerContext schedulerContext = scheduler.getContext();
         ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get("applicationContext");
         ImageSender imageSender = applicationContext.getBean(ImageSender.class);
 

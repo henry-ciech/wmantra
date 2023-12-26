@@ -1,7 +1,7 @@
 
 package eu.ciechanowiec.bot.utils;
 
-import eu.ciechanowiec.bot.model.LocationData;
+import eu.ciechanowiec.bot.model.Location;
 import eu.ciechanowiec.bot.model.User;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +21,13 @@ public class MessageTemplater {
                 """, userName);
     }
 
-    public String getWhenNextReports(LocationData locationData, User user) {
+    public String getWhenNextReports(Location location, User user) {
         LocalTime time = user.getTime();
         String timeStr = time.toString();
         return String.format("""
                 ⏰ Your daily weather updates are scheduled for *%s*
                 🌍 Location: *%s, %s*
-                """, timeStr, locationData.city(), locationData.country());
+                """, timeStr, location.city(), location.country());
     }
 
     public String getAskLocationMessage() {
@@ -36,7 +36,7 @@ public class MessageTemplater {
                 """;
     }
 
-    public String getErrorMessage() {
+    public String getWrongDataMessage() {
         return "I didn't understand that message 🤔 Please try again with a supported message type.";
     }
 
@@ -47,6 +47,9 @@ public class MessageTemplater {
                 """;
     }
 
+    public String getErrorMessage() {
+        return "Something went wrong, try later";
+    }
 
     public String getAskConfigMessage() {
         return """

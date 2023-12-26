@@ -1,10 +1,7 @@
 package eu.ciechanowiec.bot.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalTime;
 
@@ -14,6 +11,8 @@ import java.time.LocalTime;
 @Table(name = "user_data")
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class User {
 
     @Id

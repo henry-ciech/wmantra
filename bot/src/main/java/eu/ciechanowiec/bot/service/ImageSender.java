@@ -3,11 +3,7 @@ package eu.ciechanowiec.bot.service;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -16,35 +12,22 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 @Service
 public class ImageSender {
 
     private final UserService userService;
     private final TelegramBot telegramBot;
+    private final ScreenshoterClient screenshoterClient;
 
     @Value("${image.path}")
     private String imagePath;
 
-    @Value("${base.url}")
-    private String baseUrl;
-
     @Autowired
-    public ImageSender(ApplicationContext applicationContext, UserService userService) {
+    public ImageSender(UserService userService, ScreenshoterClient screenshoterClient, TelegramBot telegramBot) {
         this.userService = userService;
-        this.telegramBot = applicationContext.getBean(TelegramBot.class);
-    }
-
-    @SneakyThrows
-    private ByteArrayInputStream getImageAsInputStream(double longitude, double latitude) {
-        String url = String.format("%s/take-screenshot?longitude=%f&latitude=%f", baseUrl, longitude, latitude);
-        RestOperations restTemplate = new RestTemplate();
-
-        ResponseEntity<byte[]> response = restTemplate.getForEntity(url, byte[].class);
-
-        Optional<byte[]> imageBytesNullable = Optional.ofNullable(response.getBody());
-        return imageBytesNullable.map(ByteArrayInputStream::new).orElse(getErrorPhoto());
+        this.telegramBot = telegramBot;
+        this.screenshoterClient = screenshoterClient;
     }
 
     @SneakyThrows
@@ -63,7 +46,8 @@ public class ImageSender {
         double longitude = userService.findLongitude(chatId);
         double latitude = userService.findLatitude(chatId);
 
-        ByteArrayInputStream inputStream = getImageAsInputStream(longitude, latitude);
+        ByteArrayInputStream inputStream =
+                screenshoterClient.getImageAsInputStream(longitude, latitude, getErrorPhoto());
         SendPhoto photo = new SendPhoto();
         photo.setChatId(chatIdStr);
 
