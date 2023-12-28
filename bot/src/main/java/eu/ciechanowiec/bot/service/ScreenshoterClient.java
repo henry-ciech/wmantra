@@ -22,7 +22,6 @@ public class ScreenshoterClient {
         String url = String.format("%s/take-screenshot?longitude=%f&latitude=%f", baseUrl, longitude, latitude);
         RestOperations restTemplate = new RestTemplate();
 
-        System.out.println(url);
         ResponseEntity<byte[]> response = restTemplate.getForEntity(url, byte[].class);
 
         Optional<byte[]> imageBytesNullable = Optional.ofNullable(response.getBody());

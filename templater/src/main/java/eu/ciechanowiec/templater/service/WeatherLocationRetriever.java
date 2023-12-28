@@ -38,7 +38,6 @@ public class WeatherLocationRetriever {
     @SuppressWarnings("OverlyBroadThrowsClause")
     public WeatherData retrieve(double longitude, double latitude) throws JsonProcessingException {
         String responseBody = weatherApiClient.getResponse(latitude, longitude);
-        System.out.println(responseBody.length());
 
         JsonNode rootNode = objectMapper.readTree(responseBody);
         JsonNode locationNode = rootNode.path(JsonPathsConstants.LOCATION);

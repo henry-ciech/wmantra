@@ -60,7 +60,6 @@ class MainControllerTest {
                         .param("latitude", String.valueOf(0.0)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
-                // CurrentWeatherData fields
                 .andExpect(model().attribute("currentHourPlusTwoIcon", expectedCurrentHourPlusTwoIcon))
                 .andExpect(model().attribute("currentHourPlusFourIcon", expectedCurrentHourPlusFourIcon))
                 .andExpect(model().attribute("currentHourPlusSixIcon", expectedCurrentHourPlusSixIcon))

@@ -36,10 +36,8 @@ public class LocationRetriever {
         ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
         String responseBody = response.getBody();
 
-        System.out.println(responseBody);
         Gson gson = new Gson();
         Location location = gson.fromJson(responseBody, Location.class);
-        System.out.println(location);
         return location;
     }
 }

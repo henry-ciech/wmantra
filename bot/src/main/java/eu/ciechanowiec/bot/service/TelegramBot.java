@@ -27,7 +27,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         super(options, botConfig.getToken());
         this.botConfig = botConfig;
         this.applicationContext = applicationContext;
-        System.out.println();
     }
 
     @Override
