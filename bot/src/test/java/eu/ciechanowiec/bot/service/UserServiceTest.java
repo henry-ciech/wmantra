@@ -73,8 +73,8 @@ class UserServiceTest {
 
     @Test
     void testCreateUserWithChatIdAndUserInfo() {
-        userService.createUserWithChatIdAndUserInfo(3L, "newUserId", "newUserName");
-        User newUser = userRepository.findUser(3L);
+        userService.createUserWithChatIdAndUserInfo(2L, "newUserId", "newUserName");
+        User newUser = userRepository.findUser(2L);
         assertAll(
                 () -> assertNotNull(newUser),
                 () -> assertEquals("newUserId", newUser.getUserId()),
@@ -107,14 +107,14 @@ class UserServiceTest {
 
     @Test
     void testSaveTime() {
-        // Assuming you have a way to create a mock Update object
-        Update update = createMockUpdateWithMessage(); // mock method to create Update with specific text and chatId
+        Update update = createMockUpdateWithMessage();
         userService.saveTime(update);
         User updatedUser = userRepository.findUser(1L);
 
+        LocalTime time = updatedUser.getTime();
         assertAll(
-                () -> assertNotNull(updatedUser.getTime()),
-                () -> assertEquals(LocalTime.of(0, 0), updatedUser.getTime())
+                () -> assertNotNull(time),
+                () -> assertEquals(LocalTime.of(0, 0), time)
         );
     }
 
@@ -124,25 +124,23 @@ class UserServiceTest {
         long chatId = 1L;
         LocalTime newTime = LocalTime.of(1, 0);
 
-        // Update time
         userService.updateTime(chatId, newTime);
 
-        // Retrieve the user again to ensure we have the latest data
         User updatedUser = userRepository.findUser(chatId);
 
-        // Assert the time has been updated
-        assertEquals(newTime, updatedUser.getTime());
+        LocalTime time = updatedUser.getTime();
+        assertEquals(newTime, time);
     }
 
     @Test
     void testDetermineConfigurationStage() {
         ConfigurationStage stage = userService.determinConfigurationStage(1L);
-        assertEquals(ConfigurationStage.COMPLETED, stage); // Assuming location and time are already set for chatId 1L
+        assertEquals(ConfigurationStage.COMPLETED, stage);
     }
 
     @Test
     void testSaveLocation() {
-        Update update = createMockUpdateWithLocation(); // mock method to create Update with specific location and chatId
+        Update update = createMockUpdateWithLocation();
         userService.saveLocation(update);
         User updatedUser = userRepository.findUser(1L);
 

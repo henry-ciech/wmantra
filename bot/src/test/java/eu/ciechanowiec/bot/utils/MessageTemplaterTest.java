@@ -25,7 +25,7 @@ class MessageTemplaterTest {
     }
 
     @Test
-    void nextReportShouldContainNameAndLocation() {
+    void testNextReport() {
         MessageTemplater messageTemplater = new MessageTemplater();
 
         Location.LocationDetails locationDetails =
@@ -42,5 +42,6 @@ class MessageTemplaterTest {
                 🌍 Location: *test, test*
                 """;
 
+        assertEquals(expectedMessage, actualMessage);
     }
 }

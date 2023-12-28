@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MessageDTOTest {
 
-
     @Test
     void withNewMessageTypeShouldChangeCommand() {
         Update update = new Update();
@@ -20,5 +19,4 @@ class MessageDTOTest {
 
         assertEquals(expectedMessageDTO, messageDTOWithNewType);
     }
-
 }

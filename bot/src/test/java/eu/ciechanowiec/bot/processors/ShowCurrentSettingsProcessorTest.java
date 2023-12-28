@@ -6,6 +6,7 @@ import eu.ciechanowiec.bot.model.User;
 import eu.ciechanowiec.bot.repository.UserRepository;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,26 +32,45 @@ import static org.mockito.Mockito.verify;
 class ShowCurrentSettingsProcessorTest {
 
     @Autowired
-    TelegramBot spyBot;
+    private TelegramBot spyBot;
     @Autowired
-    ShowCurrentSettingsProcessor showCurrentSettingsProcessor;
+    private ShowCurrentSettingsProcessor showCurrentSettingsProcessor;
     @Autowired
-    UserRepository userRepository;
-
+    private UserRepository userRepository;
     @Captor
-    ArgumentCaptor<SendMessage> sendMessageCaptor;
+    private ArgumentCaptor<SendMessage> sendMessageCaptor;
+    private static final double UTC0_LATITUDE = 51.509865;
+    private static final double UTC0_LONGITUDE = -0.118092;
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void testFullConfigurationMessage() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
 
-        User user = new User(1L, -0.118092, 51.509865, LocalTime.of(0, 0),
+        User user = new User(1L, UTC0_LONGITUDE, UTC0_LATITUDE, LocalTime.of(0, 0),
                 "testUserId", "testUserName", false);
 
         userRepository.save(user);
+        MessageDTO messageDTO = getMessageDTO(user);
+        showCurrentSettingsProcessor.process(messageDTO);
+
+        verify(spyBot).execute(sendMessageCaptor.capture());
+        SendMessage sendMessage = sendMessageCaptor.getValue();
+        String actualText = sendMessage.getText();
+        String expectedText = """
+                ⏰ Your daily weather updates are scheduled for *00:00*
+                🌍 Location: *London, United Kingdom*
+                """;
+        assertEquals(expectedText, actualText);
+    }
+
+    private static MessageDTO getMessageDTO(User user) {
         Update update = new Update();
         Message message = new Message();
         Chat chat = new Chat();
@@ -65,17 +85,7 @@ class ShowCurrentSettingsProcessorTest {
         chat.setFirstName(user.getUserName());
         message.setChat(chat);
         update.setMessage(message);
-        MessageDTO messageDTO = new MessageDTO(update, Command.SHOW_CURRENT_SETTINGS);
-        showCurrentSettingsProcessor.process(messageDTO);
-
-        verify(spyBot).execute(sendMessageCaptor.capture());
-        SendMessage sendMessage = sendMessageCaptor.getValue();
-        String actualText = sendMessage.getText();
-        String expectedText = """
-                                ⏰ Your daily weather updates are scheduled for *00:00*
-                                🌍 Location: *London, United Kingdom*
-                                """;
-        assertEquals(expectedText, actualText);
+        return new MessageDTO(update, Command.SHOW_CURRENT_SETTINGS);
     }
 
     @Test

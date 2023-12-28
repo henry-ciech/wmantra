@@ -37,7 +37,7 @@ class UnknownProcessor implements Processor {
 
     @SneakyThrows
     private void sendErrorMessage(long chatId, MessageDTO messageDTO) {
-        String messageToPrint = messageTemplater.getErrorMessage();
+        String messageToPrint = messageTemplater.getWrongDataMessage();
         String chatIdStr = String.valueOf(chatId);
         SendMessage sendMessage = new SendMessage(chatIdStr, messageToPrint);
         telegramBot.execute(sendMessage);

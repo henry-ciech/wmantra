@@ -5,6 +5,7 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -14,6 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,30 +27,33 @@ class AskTimeProcessorTest {
 
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
-
     @Autowired
     private AskTimeProcessor askTimeProcessor;
     @Autowired
-    TelegramBot telegramBot;
+    private TelegramBot spyBot;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
     @Test
     void commandShouldBeAskTime() {
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        Processor processor = new AskTimeProcessor(mockTelegramBot);
-
-        Command command = processor.getCommandType();
+        Command command = askTimeProcessor.getCommandType();
         assertEquals(Command.ASK_TIME, command);
     }
 
-    @SuppressWarnings("ChainedMethodCall")
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void processShouldSendMessage() {
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+
         MessageTemplater messageTemplater = new MessageTemplater();
         Update update = new Update();
         Message message = new Message();
@@ -63,8 +69,8 @@ class AskTimeProcessorTest {
         askTimeProcessor.process(messageDTO);
 
         sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramBot, times(2)).execute(sendMessageCaptor.capture());
-        SendMessage capturedSendMessage = sendMessageCaptor.getAllValues().get(1);
+        verify(spyBot, times(1)).execute(sendMessageCaptor.capture());
+        SendMessage capturedSendMessage = sendMessageCaptor.getValue();
 
         assertEquals(askTimeMessage, capturedSendMessage.getText());
     }

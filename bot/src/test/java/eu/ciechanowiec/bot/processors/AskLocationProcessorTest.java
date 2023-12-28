@@ -5,6 +5,7 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -23,37 +26,39 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.List;
-
 @SpringBootTest
-class AskLocationProcessorTestDetails {
+class AskLocationProcessorTest {
 
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
     @Autowired
-    TelegramBot telegramBot;
+    private TelegramBot spyBot;
 
     @Autowired
-    AskLocationProcessor askLocationProcessor;
+    private AskLocationProcessor askLocationProcessor;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
     @Test
     void commandShouldBeAskLocation() {
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        Processor processor = new AskLocationProcessor(mockTelegramBot);
-
-        Command command = processor.getCommandType();
+        Command command = askLocationProcessor.getCommandType();
         assertEquals(Command.ASK_LOCATION, command);
     }
 
-    @SuppressWarnings("ChainedMethodCall")
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void processShouldSendMessage() {
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+
         MessageTemplater messageTemplater = new MessageTemplater();
         Update update = new Update();
         Message message = new Message();
@@ -68,12 +73,9 @@ class AskLocationProcessorTestDetails {
 
         askLocationProcessor.process(messageDTO);
 
-        sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramBot, times(4)).execute(sendMessageCaptor.capture());
-        List<SendMessage> allValues = sendMessageCaptor.getAllValues();
-        System.out.println(allValues);
-        SendMessage capturedSendMessage = allValues.get(3);
-
-        assertEquals(askLocationMessage, capturedSendMessage.getText());
+        assertAll(
+                () -> verify(spyBot, times(1)).execute(sendMessageCaptor.capture()),
+                () -> assertEquals(askLocationMessage, sendMessageCaptor.getValue().getText())
+        );
     }
 }

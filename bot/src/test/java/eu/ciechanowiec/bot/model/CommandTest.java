@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -21,46 +20,47 @@ class CommandTest {
     @Test
     void messageWithLocationShouldReturnSaveLocation() {
         Message message = new Message();
-        message.setLocation(new Location());
+        Location location = new Location();
+        message.setLocation(location);
 
-        Command result = Command.of(message);
-        assertEquals(Command.SAVE_LOCATION, result);
+        Command actualResult = Command.of(message);
+        assertEquals(Command.SAVE_LOCATION, actualResult);
     }
 
     @Test
-    void messageWithValidTimeShouldReturnSaveTime() {
+    void messageWithTimeShouldReturnSaveTime() {
         Message message = new Message();
         message.setText("00:00");
 
-        Command result = Command.of(message);
-        assertEquals(Command.SAVE_TIME, result);
+        Command actualResult = Command.of(message);
+        assertEquals(Command.SAVE_TIME, actualResult);
     }
 
     @ParameterizedTest
     @MethodSource("args")
-    void messageTextCorrespondingToTheCommandNameShouldReturnThisCommand(Command expectedCommand, String text) {
+    void messageReturnCorrespondingCommand(Command expectedCommand, String text) {
         Message message = new Message();
         message.setText(text);
 
-        Command result = Command.of(message);
-        assertEquals(expectedCommand, result);
+        Command actualResult = Command.of(message);
+        assertEquals(expectedCommand, actualResult);
     }
 
     static Stream<Arguments> args() {
-       return Stream.of(
-               arguments(Command.START, "/start"),
-               arguments(Command.UNKNOWN, "/askLocation"),
-               arguments(Command.UNKNOWN, "/askTime"),
-               arguments(Command.CONFIG, "/config"),
-               arguments(Command.CONFIG, MessageTemplater.CONFIGURE_BUTTON_TEXT),
-               arguments(Command.UNKNOWN, "/unknown"),
-               arguments(Command.SHOW_CURRENT_SETTINGS, "/showCurrentSettings"),
-               arguments(Command.SHOW_CURRENT_WEATHER, "/showCurrentWeather"),
-               arguments(Command.SHOW_CURRENT_WEATHER, MessageTemplater.SHOW_CURRENT_SETTINGS_BUTTON_TEXT),
-               arguments(Command.UNKNOWN, "/default"),
-               arguments(Command.UNKNOWN, "/saveLocation"),
-               arguments(Command.UNKNOWN, "/saveTime")
-       );
+        return Stream.of(
+                arguments(Command.START, "/start"),
+                arguments(Command.UNKNOWN, "/askLocation"),
+                arguments(Command.UNKNOWN, "/askTime"),
+                arguments(Command.CONFIG, "/config"),
+                arguments(Command.CONFIG, MessageTemplater.CONFIGURE_BUTTON_TEXT),
+                arguments(Command.UNKNOWN, "/unknown"),
+                arguments(Command.SHOW_CURRENT_SETTINGS, "/showCurrentSettings"),
+                arguments(Command.SHOW_CURRENT_WEATHER, "/showCurrentWeather"),
+                arguments(Command.SHOW_CURRENT_WEATHER, MessageTemplater.SHOW_CURRENT_SETTINGS_BUTTON_TEXT),
+                arguments(Command.UNKNOWN, "/default"),
+                arguments(Command.UNKNOWN, "/saveLocation"),
+                arguments(Command.UNKNOWN, "/saveTime")
+        );
     }
 
     @Test

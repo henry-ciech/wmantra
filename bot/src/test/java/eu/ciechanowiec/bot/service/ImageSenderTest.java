@@ -2,101 +2,125 @@ package eu.ciechanowiec.bot.service;
 
 import lombok.SneakyThrows;
 import org.apache.commons.compress.utils.IOUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ImageSenderTest {
 
-    private static final String IMAGE_PATH = "/home/henryk/0_prog/wmantra/bot/src/test/resources/errorImage.png";
+    @Autowired
+    private TelegramBot spyBot;
+
     @Captor
-    ArgumentCaptor<SendPhoto> photoCaptor;
+    private ArgumentCaptor<SendPhoto> photoCaptor;
 
-    @SneakyThrows
-    @Test
-    void errorShouldBeSent() {
-        // Mock dependencies
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        UserService mockUserService = Mockito.mock(UserService.class);
-        ScreenshoterClient mockScreenshoterClient = Mockito.mock(ScreenshoterClient.class);
+    @Value("${error.image}")
+    private String errorImageFilePath;
 
-        // Initialize ImageSender
-        ImageSender imageSender = new ImageSender(mockUserService, mockScreenshoterClient, mockTelegramBot);
+    @Value("${test.image.path}")
+    private String testImagePath;
 
-        // Set up test data
-        String testImagePath = "/errorImage.png"; // Path relative to resources folder
-        InputStream testImageStream = getClass().getResourceAsStream(testImagePath);
-
-        // Use ReflectionTestUtils to inject test image path
-        ReflectionTestUtils.setField(imageSender, "imagePath", getClass().getResource(testImagePath).getPath());
-
-        // Mock method to return test image stream
-        Mockito.when(mockScreenshoterClient.getImageAsInputStream(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any()))
-                .thenReturn(new ByteArrayInputStream(IOUtils.toByteArray(testImageStream)));
-
-        // Invoke the method under test
-        imageSender.sendImageToTheUser(1L);
-
-        // Capture and verify the sent photo
-        ArgumentCaptor<SendPhoto> photoCaptor = ArgumentCaptor.forClass(SendPhoto.class);
-        verify(mockTelegramBot).execute(photoCaptor.capture());
-        SendPhoto sentPhoto = photoCaptor.getValue();
-
-        // Convert and compare byte arrays
-        byte[] sentBytes = IOUtils.toByteArray((InputStream) sentPhoto.getPhoto().getNewMediaStream());
-        byte[] expectedBytes = IOUtils.toByteArray(getClass().getResourceAsStream(testImagePath));
-        assertArrayEquals(expectedBytes, sentBytes);
-    }
-
-
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void imageShouldBeSent() {
-        // Mock dependencies
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        UserService mockUserService = Mockito.mock(UserService.class);
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendChatAction.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendPhoto.class));
+
+        UserService userService = mock(UserService.class);
+        when(userService.findLatitude(anyLong())).thenReturn(0.0);
+        when(userService.findLongitude(anyLong())).thenReturn(0.0);
+
         ScreenshoterClient mockScreenshoterClient = Mockito.mock(ScreenshoterClient.class);
 
-        // Initialize ImageSender
-        ImageSender imageSender = new ImageSender(mockUserService, mockScreenshoterClient, mockTelegramBot);
+        ImageSender imageSender = new ImageSender(userService, mockScreenshoterClient, spyBot);
 
-        // Define the path to the test image
-        String testImagePath = "/home/henryk/0_prog/wmantra/bot/src/main/resources/testImage.png";
-
-        // Use ReflectionTestUtils to inject test image path into ImageSender
         ReflectionTestUtils.setField(imageSender, "imagePath", testImagePath);
 
-        // Read the test image file into a byte array
-        byte[] testImageBytes = Files.readAllBytes(Paths.get(testImagePath));
+        Path path = Paths.get(testImagePath);
+        byte[] expectedImageBytes = Files.readAllBytes(path);
 
-        // Mock method to return test image stream
-        Mockito.when(mockScreenshoterClient.getImageAsInputStream(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any()))
-                .thenReturn(new ByteArrayInputStream(testImageBytes));
+        ByteArrayInputStream value = new ByteArrayInputStream(expectedImageBytes);
+        when(mockScreenshoterClient.getImageAsInputStream(anyDouble(), anyDouble(), any())).thenReturn(value);
 
-        // Invoke the method under test
         imageSender.sendImageToTheUser(1L);
 
-        // Capture and verify the sent photo
-        ArgumentCaptor<SendPhoto> photoCaptor = ArgumentCaptor.forClass(SendPhoto.class);
-        verify(mockTelegramBot).execute(photoCaptor.capture());
+        TelegramBot verify = verify(spyBot);
+        verify.execute(photoCaptor.capture());
         SendPhoto sentPhoto = photoCaptor.getValue();
 
-        // Convert and compare byte arrays
-        byte[] sentBytes = IOUtils.toByteArray((InputStream) sentPhoto.getPhoto().getNewMediaStream());
-        assertArrayEquals(testImageBytes, sentBytes);
+        InputFile photo = sentPhoto.getPhoto();
+        InputStream newMediaStream = photo.getNewMediaStream();
+        byte[] actualBytes = IOUtils.toByteArray(newMediaStream);
+        assertArrayEquals(expectedImageBytes, actualBytes);
+    }
+
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
+    @SneakyThrows
+    @Test
+    void errorShouldBeSent() {
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendChatAction.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendPhoto.class));
+
+        UserService userService = mock(UserService.class);
+        when(userService.findLatitude(anyLong())).thenReturn(0.0);
+        when(userService.findLongitude(anyLong())).thenReturn(0.0);
+
+        ScreenshoterClient mockScreenshoterClient = Mockito.mock(ScreenshoterClient.class);
+        ImageSender imageSender = new ImageSender(userService, mockScreenshoterClient, spyBot);
+
+        Class<? extends ImageSenderTest> runtimeClass = getClass();
+        InputStream resourceAsStream = runtimeClass.getResourceAsStream(errorImageFilePath);
+
+        URL resource = runtimeClass.getResource(errorImageFilePath);
+        URL url = Objects.requireNonNull(resource);
+        String path = url.getPath();
+        ReflectionTestUtils.setField(imageSender, "imagePath", path);
+
+        InputStream input = Objects.requireNonNull(resourceAsStream);
+        ByteArrayInputStream value = new ByteArrayInputStream(IOUtils.toByteArray(input));
+        when(mockScreenshoterClient.getImageAsInputStream(anyDouble(), anyDouble(), any())).thenReturn(value);
+
+        imageSender.sendImageToTheUser(1L);
+
+        TelegramBot verify = verify(spyBot);
+        verify.execute(photoCaptor.capture());
+        SendPhoto sentPhoto = photoCaptor.getValue();
+
+        InputFile photo = sentPhoto.getPhoto();
+        InputStream newMediaStream = photo.getNewMediaStream();
+        byte[] actualBytes = IOUtils.toByteArray(newMediaStream);
+        InputStream expectedBytesInput = Objects.requireNonNull(resourceAsStream);
+        byte[] expectedBytes = IOUtils.toByteArray(expectedBytesInput);
+        resourceAsStream.close();
+        assertArrayEquals(expectedBytes, actualBytes);
+    }
+
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
     }
 }

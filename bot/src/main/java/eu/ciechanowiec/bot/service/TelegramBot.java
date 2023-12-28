@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
-@Primary
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;

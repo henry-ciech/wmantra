@@ -10,13 +10,15 @@ import eu.ciechanowiec.bot.service.ScreenshoterClient;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,41 +27,45 @@ import org.telegram.telegrambots.meta.api.objects.*;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @SpringBootTest
+@ActiveProfiles("h2")
 class ShowCurrentWeatherProcessorTest {
 
     @Autowired
-    TelegramBot spyBot;
+    private TelegramBot spyBot;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+    private static final double UTC0_LATITUDE = 51.509865;
+    private static final double UTC0_LONGITUDE = -0.118092;
+    @Value("${test.image.path}")
+    private String testImagePath;
+    @Value("${error.image.path}")
+    private String errorImagePath;
     @Captor
-    ArgumentCaptor<MessageDTO> messageDTOCaptor;
+    private ArgumentCaptor<MessageDTO> messageDTOCaptor;
 
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void redirectToShowCurrentSettings() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
 
         ScreenshoterClient mockScreenshoterClient = Mockito.mock(ScreenshoterClient.class);
         ImageSender imageSender = getImageSenderSpy(mockScreenshoterClient);
         UserService userService = Mockito.mock(UserService.class);
-        Mockito.when(userService.determinConfigurationStage(anyLong())).
-                thenReturn(ConfigurationStage.NO_LOCATION_AND_TIME);
+        when(userService.determinConfigurationStage(anyLong())).thenReturn(ConfigurationStage.NO_LOCATION_AND_TIME);
 
-        ShowCurrentWeatherProcessor showCurrentWeatherProcessor =
-                new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
+        Processor showCurrentWeatherProcessor = new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
 
         Update update = new Update();
         Message message = new Message();
@@ -69,53 +75,53 @@ class ShowCurrentWeatherProcessorTest {
         update.setMessage(message);
         MessageDTO messageDTO = new MessageDTO(update, Command.SHOW_CURRENT_SETTINGS);
         showCurrentWeatherProcessor.process(messageDTO);
-        verify(spyBot, times(4)).onUpdateReceived(messageDTOCaptor.capture());
-        Command command = messageDTOCaptor.getAllValues().get(2).command();
+        verify(spyBot, times(1)).onUpdateReceived(messageDTOCaptor.capture());
+        Command command = messageDTOCaptor.getValue().command();
 
         assertEquals(Command.SHOW_CURRENT_SETTINGS, command);
     }
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
+    @SuppressWarnings({"ReturnOfNull", "ChainedMethodCall"})
     @SneakyThrows
     @Test
     void shouldSendImage() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendChatAction.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendPhoto.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendChatAction.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendPhoto.class));
+
         UserService userService = new UserService(userRepository);
 
-        // Initialize ImageSender
+        Path path = Paths.get(testImagePath);
+        byte[] testImageBytes = Files.readAllBytes(path);
 
-        // Define the path to the test image
-        String testImagePath = "/home/henryk/0_prog/wmantra/bot/src/main/resources/testImage.png";
-
-        // Use ReflectionTestUtils to inject test image path into ImageSender
-
-        // Read the test image file into a byte array
-        byte[] testImageBytes = Files.readAllBytes(Paths.get(testImagePath));
-
-        // Mock method to return test image stream
         ScreenshoterClient mockScreenshoterClient = Mockito.mock(ScreenshoterClient.class);
-        Mockito.when(mockScreenshoterClient.getImageAsInputStream(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any()))
+        when(mockScreenshoterClient.getImageAsInputStream(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any()))
                 .thenReturn(new ByteArrayInputStream(testImageBytes));
         ImageSender imageSender = getImageSenderSpy(mockScreenshoterClient);
         ReflectionTestUtils.setField(imageSender, "imagePath", testImagePath);
 
-        ShowCurrentWeatherProcessor showCurrentWeatherProcessor =
-                new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
-        User user = new User(1L, -0.118092, 51.509865, LocalTime.of(0, 0),
+        Processor showCurrentWeatherProcessor = new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
+        User user = new User(1L, UTC0_LONGITUDE, UTC0_LATITUDE, LocalTime.of(0, 0),
                 "testUserId", "testUserName", false);
 
-        ReflectionTestUtils.setField(imageSender, "imagePath",
-                "/home/henryk/0_prog/wmantra/bot/src/main/resources/errorImage.png");
+        ReflectionTestUtils.setField(imageSender, "imagePath", errorImagePath);
 
         userRepository.save(user);
 
+        MessageDTO messageDTO = getMessageDTO(user);
+        showCurrentWeatherProcessor.process(messageDTO);
+
+        verify(imageSender).sendImageToTheUser(anyLong());
+        Command command = showCurrentWeatherProcessor.getCommandType();
+        assertEquals(Command.SHOW_CURRENT_WEATHER, command);
+    }
+
+    private static MessageDTO getMessageDTO(User user) {
         Update update = new Update();
         Message message = new Message();
         Chat chat = new Chat();
@@ -130,12 +136,7 @@ class ShowCurrentWeatherProcessorTest {
         chat.setFirstName(user.getUserName());
         message.setChat(chat);
         update.setMessage(message);
-        MessageDTO messageDTO = new MessageDTO(update, Command.SHOW_CURRENT_SETTINGS);
-        showCurrentWeatherProcessor.process(messageDTO);
-
-        verify(imageSender).sendImageToTheUser(anyLong());
-        Command command = showCurrentWeatherProcessor.getCommandType();
-        assertEquals(Command.SHOW_CURRENT_WEATHER, command);
+        return new MessageDTO(update, Command.SHOW_CURRENT_SETTINGS);
     }
 
     ImageSender getImageSenderSpy(ScreenshoterClient screenshoterClient) {

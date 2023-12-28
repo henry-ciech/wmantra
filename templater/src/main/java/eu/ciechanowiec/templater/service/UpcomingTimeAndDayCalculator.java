@@ -9,18 +9,29 @@ import java.util.Locale;
 public class UpcomingTimeAndDayCalculator {
 
     private static final int HOURS_IN_DAY = 24;
+    private static final int MINUTES_TO_ROUNDUP = 30;
 
     public int[] calculateNextTenHours(LocalTime localTime) {
         int hour = localTime.getHour();
+        int minutes = localTime.getMinute();
+        hour = roundToNextHourIfNecessary(hour, minutes);
 
         int[] nextHours = new int[5];
-        hour += 2;
-        nextHours[0] = hour;
-
-        for (int i = 1; i < nextHours.length; i++) {
-            nextHours[i] = (hour + 2 * i) % HOURS_IN_DAY;
+        for (int i = 0; i < nextHours.length; i++) {
+            nextHours[i] = calculateNextHour(hour, i);
         }
         return nextHours;
+    }
+
+    private int roundToNextHourIfNecessary(int hour, int minutes) {
+        if (minutes >= MINUTES_TO_ROUNDUP) {
+            return (hour + 1) % HOURS_IN_DAY;
+        }
+        return hour;
+    }
+
+    private int calculateNextHour(int startHour, int increment) {
+        return (startHour + 2 * (increment + 1)) % HOURS_IN_DAY;
     }
 
     public String[] calculateNextTwoDays(DayOfWeek day) {

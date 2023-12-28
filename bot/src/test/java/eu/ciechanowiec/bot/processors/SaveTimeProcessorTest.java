@@ -7,6 +7,7 @@ import eu.ciechanowiec.bot.repository.UserRepository;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -29,30 +30,31 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 class SaveTimeProcessorTest {
 
     @Autowired
-    TelegramBot spyBot;
+    private TelegramBot spyBot;
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    SaveTimeProcessor saveTimeProcessor;
+    private SaveTimeProcessor saveTimeProcessor;
     @Autowired
-    UserRepository userRepository;
-
+    private UserRepository userRepository;
     @Captor
-    ArgumentCaptor<MessageDTO> commandCaptor;
+    private ArgumentCaptor<MessageDTO> commandCaptor;
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
+    @SuppressWarnings({"ReturnOfNull", "ChainedMethodCall"})
     @SneakyThrows
     @Test
     void shouldSaveTime() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).onUpdateReceived(any(MessageDTO.class));
-
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).onUpdateReceived(any(MessageDTO.class));
 
         User testUser = new User(1L, 0.0, 0.0, null,
                 "testUserId", "testUserName", false);
+
         userRepository.save(testUser);
         Update update = new Update();
         Message message = new Message();
@@ -66,25 +68,22 @@ class SaveTimeProcessorTest {
         message.setText("0:00");
         update.setMessage(message);
         MessageDTO messageDTO = new MessageDTO(update, Command.START);
+
         saveTimeProcessor.process(messageDTO);
 
-        verify(spyBot, times(2)).onUpdateReceived(commandCaptor.capture());
-
-        assertEquals(Command.SHOW_CURRENT_SETTINGS, commandCaptor.getAllValues().get(1).command());
-
-        assertTrue(userService.isTimeSpecified(1L));
+        assertAll(
+                () -> verify(spyBot, times(1)).onUpdateReceived(commandCaptor.capture()),
+                () -> assertEquals(Command.SHOW_CURRENT_SETTINGS, commandCaptor.getValue().command()),
+                () -> assertTrue(userService.isTimeSpecified(1L))
+        );
     }
 
+    @SuppressWarnings({"ReturnOfNull", "ChainedMethodCall"})
     @SneakyThrows
     @Test
     void shouldRedirectToAskLocation() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).onUpdateReceived(any(MessageDTO.class));
-
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).onUpdateReceived(any(MessageDTO.class));
 
         Update update = new Update();
         Message message = new Message();
@@ -96,11 +95,11 @@ class SaveTimeProcessorTest {
         MessageDTO messageDTO = new MessageDTO(update, Command.START);
         saveTimeProcessor.process(messageDTO);
 
-        verify(spyBot).onUpdateReceived(commandCaptor.capture());
-
-        assertEquals(Command.ASK_LOCATION, commandCaptor.getValue().command());
+        assertAll(
+                () -> verify(spyBot).onUpdateReceived(commandCaptor.capture()),
+                () -> assertEquals(Command.ASK_LOCATION, commandCaptor.getValue().command())
+        );
     }
-
 
     @Test
     void commandShouldBeSaveTime() {

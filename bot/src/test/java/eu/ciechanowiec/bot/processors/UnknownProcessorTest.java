@@ -5,6 +5,7 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -27,7 +28,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 class UnknownProcessorTest {
 
     @Autowired
-    private TelegramBot telegramBot;
+    private TelegramBot spyBot;
     @Autowired
     private UnknownProcessor unknownProcessor;
 
@@ -36,14 +37,18 @@ class UnknownProcessorTest {
     @Captor
     private ArgumentCaptor<MessageDTO> messageDTOCaptor;
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void shouldSendErrorMessage() {
         MessageTemplater messageTemplater = new MessageTemplater();
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(telegramBot).execute(any(SendMessage.class));
-        TelegramBot telegramBot1 = telegramBot;
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+
         Update update = new Update();
         Message message = new Message();
         Chat chat = new Chat();
@@ -53,24 +58,17 @@ class UnknownProcessorTest {
         MessageDTO messageDTO = new MessageDTO(update, Command.UNKNOWN);
         unknownProcessor.process(messageDTO);
 
-        verify(telegramBot, times(7)).execute(sendMessageCaptor.capture());
-        verify(telegramBot, times(5)).onUpdateReceived(messageDTOCaptor.capture());
+        verify(spyBot, times(2)).execute(sendMessageCaptor.capture());
+        verify(spyBot, times(2)).onUpdateReceived(messageDTOCaptor.capture());
 
         List<MessageDTO> allValues = messageDTOCaptor.getAllValues();
-        List<MessageDTO> capturedMessageDTO = allValues;
-
-        assertEquals(Command.SHOW_CURRENT_SETTINGS, capturedMessageDTO.get(2).command());
+        MessageDTO actualMessageDTO = allValues.get(0);
+        assertEquals(Command.SHOW_CURRENT_SETTINGS, actualMessageDTO.command());
 
         List<SendMessage> sendMessage = sendMessageCaptor.getAllValues();
-        for (int i = 0; i < sendMessage.size(); i++) {
-            System.out.println(i);
-            System.out.println(sendMessage.get(i).getText());
-        }
-        String errorText = sendMessage.get(5).getText();
-        assertEquals(errorText, messageTemplater.getErrorMessage());
-
-        String askLocationText = sendMessage.get(3).getText();
-        assertEquals(askLocationText, messageTemplater.getAskLocationMessage());
+        SendMessage actualSendMessage = sendMessage.get(0);
+        String errorText = actualSendMessage.getText();
+        assertEquals(errorText, messageTemplater.getWrongDataMessage());
     }
 
     @Test

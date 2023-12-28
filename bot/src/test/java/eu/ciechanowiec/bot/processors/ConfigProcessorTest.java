@@ -7,13 +7,12 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -32,23 +32,27 @@ class ConfigProcessorTest {
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
     @Autowired
-    TelegramBot telegramBot;
+    private TelegramBot spyBot;
     @Autowired
-    ConfigProcessor configProcessor;
+    private ConfigProcessor configProcessor;
+
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
 
     @Test
     void commandShouldBeConfig() {
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        Processor processor = new ConfigProcessor(mockTelegramBot);
-
-        Command command = processor.getCommandType();
+        Command command = configProcessor.getCommandType();
         assertEquals(Command.CONFIG, command);
     }
 
-    @SuppressWarnings("ChainedMethodCall")
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void processShouldSendMessage() {
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+
         MessageTemplater messageTemplater = new MessageTemplater();
         Update update = new Update();
         Message message = new Message();
@@ -64,8 +68,8 @@ class ConfigProcessorTest {
         configProcessor.process(messageDTO);
 
         sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramBot, times(3)).execute(sendMessageCaptor.capture());
-        SendMessage capturedSendMessage = sendMessageCaptor.getAllValues().get(2);
+        verify(spyBot, times(1)).execute(sendMessageCaptor.capture());
+        SendMessage capturedSendMessage = sendMessageCaptor.getValue();
 
         assertEquals(configMessage, capturedSendMessage.getText());
     }

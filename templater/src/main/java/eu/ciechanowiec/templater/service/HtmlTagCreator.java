@@ -26,7 +26,7 @@ public class HtmlTagCreator {
         String tagTemplate = htmlData.getHtmlTemplate();
         String iconName = weatherCondition.getIconName();
         String iconColor = weatherCondition.getCustomColor();
-        String size = htmlData.getBigIconSize();
+        String size = htmlData.getMainIconSize();
         String marginTop = htmlData.getMainMarginTop();
 
         return processTemplate(tagTemplate, iconName, iconColor, size, marginTop);

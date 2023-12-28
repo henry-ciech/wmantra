@@ -7,12 +7,14 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,40 +22,34 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.List;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class DefaultProcessorTest {
 
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
 
     @Autowired
-    TelegramBot spyBot;
+    private TelegramBot spyBot;
     @Autowired
-    DefaultProcessor defaultProcessor;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    private DefaultProcessor defaultProcessor;
 
     @Test
     void commandShouldBeDefault() {
-        TelegramBot mockTelegramBot = Mockito.mock(TelegramBot.class);
-        Processor processor = new DefaultProcessor(mockTelegramBot);
-
-        Command command = processor.getCommandType();
+        Command command = defaultProcessor.getCommandType();
         assertEquals(Command.DEFAULT, command);
     }
 
-    @SuppressWarnings("ChainedMethodCall")
+    @SuppressWarnings({"ChainedMethodCall", "ReturnOfNull"})
     @SneakyThrows
     @Test
     void processShouldSendMessage() {
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+
         MessageTemplater messageTemplater = new MessageTemplater();
         Update update = new Update();
         Message message = new Message();
@@ -62,17 +58,21 @@ class DefaultProcessorTest {
 
         String defaultMessage = messageTemplater.getErrorMessage();
         message.setText(defaultMessage);
-        message.setChat(chat);
         update.setMessage(message);
+        message.setChat(chat);
         MessageDTO messageDTO = new MessageDTO(update, Command.DEFAULT);
 
         defaultProcessor.process(messageDTO);
 
-        verify(spyBot, times(6)).execute(sendMessageCaptor.capture());
-        List<SendMessage> allValues = sendMessageCaptor.getAllValues();
-        System.out.println(allValues);
-        SendMessage capturedSendMessage = allValues.get(5);
+        verify(spyBot, times(1)).execute(sendMessageCaptor.capture());
+        SendMessage capturedSendMessage = sendMessageCaptor.getValue();
 
         assertEquals(defaultMessage, capturedSendMessage.getText());
+    }
+
+    @AfterEach
+    @BeforeEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
     }
 }

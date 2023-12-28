@@ -11,23 +11,26 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class LocationDetailsRetrieverTest {
 
     @Test
     void parseJsonCorrectly() {
-        String json = "{\"city\":\"New York\",\"region\":\"New York\",\"country\":\"USA\",\"longitude\":-74.006,\"latitude\":40.7128}";
+        String json = "{\"city\":\"New York\",\"region\":\"New York\"," +
+                "\"country\":\"USA\",\"longitude\":-74.006,\"latitude\":40.7128}";
         Gson gson = new Gson();
         Location expectedLocation = gson.fromJson(json, Location.class);
 
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
         LocationRetriever locationRetriever = new LocationRetriever(restTemplate);
 
-        ReflectionTestUtils.setField(locationRetriever, "apiUrl", "http://example.com/api");
+        ReflectionTestUtils.setField(locationRetriever, "apiUrl", "https://www.test.com/");
 
         ResponseEntity<String> responseEntity = new ResponseEntity<>(json, HttpStatus.OK);
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(String.class))).thenReturn(responseEntity);
+        when(restTemplate.getForEntity(Mockito.anyString(), eq(String.class))).thenReturn(responseEntity);
 
         Location actualLocation = locationRetriever.retrieveLocationData(0, 0);
 

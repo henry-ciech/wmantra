@@ -1,28 +1,21 @@
 package eu.ciechanowiec.templater.service;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ciechanowiec.JsonPathsConstants;
 import eu.ciechanowiec.templater.model.*;
 import lombok.SneakyThrows;
-import org.hibernate.engine.transaction.jta.platform.internal.JOnASJtaPlatform;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.jar.JarOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+//TODO: extract time normally
 @Component
 public class WeatherLocationRetriever {
 
@@ -33,19 +26,20 @@ public class WeatherLocationRetriever {
     @Value("${api.url}")
     private String url;
     private final ObjectMapper objectMapper;
+    private final WeatherApiClient weatherApiClient;
 
-    public WeatherLocationRetriever() {
+    @Autowired
+    public WeatherLocationRetriever(WeatherApiClient weatherApiClient) {
+        this.weatherApiClient = weatherApiClient;
         upcomingTimeAndDayCalculator = new UpcomingTimeAndDayCalculator();
         objectMapper = new ObjectMapper();
     }
 
     @SuppressWarnings("OverlyBroadThrowsClause")
     public WeatherData retrieve(double longitude, double latitude) throws JsonProcessingException {
-        RestOperations restTemplate = new RestTemplate();
-        String urlWithLocation = fillWeatherUrl(latitude, longitude);
-        ResponseEntity<String> response = restTemplate.getForEntity(urlWithLocation, String.class);
+        String responseBody = weatherApiClient.getResponse(latitude, longitude);
+        System.out.println(responseBody.length());
 
-        String responseBody = response.getBody();
         JsonNode rootNode = objectMapper.readTree(responseBody);
         JsonNode locationNode = rootNode.path(JsonPathsConstants.LOCATION);
         JsonNode currentWeatherNode = rootNode.path(JsonPathsConstants.CURRENT);
@@ -67,13 +61,6 @@ public class WeatherLocationRetriever {
         ForecastWeatherData forecastWeatherData = new ForecastWeatherData(forecastConditions, forecastTemperatures);
 
         return new WeatherData(currentWeatherData, forecastWeatherData);
-    }
-
-    private static String extractTime(CharSequence jsonStr) {
-        Pattern timePattern = Pattern.compile("\\b(\\d{2}:\\d{2})\\b");
-        Matcher matcher = timePattern.matcher(jsonStr);
-
-        return matcher.group(1);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
@@ -190,15 +177,5 @@ public class WeatherLocationRetriever {
             }
         }
         throw new IllegalArgumentException("Hour not found");
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private String fillWeatherUrl(double latitude, double longitude) {
-        UriComponentsBuilder currentBuilder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("key", apiKey)
-                .queryParam("q", latitude + "," + longitude)
-                .queryParam("days", 3);
-
-        return currentBuilder.toUriString();
     }
 }

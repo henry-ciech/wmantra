@@ -8,12 +8,14 @@ import eu.ciechanowiec.bot.repository.UserRepository;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
 
@@ -24,32 +26,38 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("h2")
 class SaveLocationProcessorTest {
 
     @Autowired
-    TelegramBot spyBot;
+    private TelegramBot spyBot;
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    SaveLocationProcessor saveLocationProcessor;
+    private SaveLocationProcessor saveLocationProcessor;
     @Autowired
-    UserRepository userRepository;
-
+    private UserRepository userRepository;
     @Captor
-    ArgumentCaptor<MessageDTO> commandCaptor;
+    private ArgumentCaptor<MessageDTO> commandCaptor;
+    private static final double UTC1_LONGITUDE = 13.404954;
+    private static final double UTC1_LATITUDE = 52.5200;
+    private static final double UTC0_LATITUDE = 51.509865;
+    private static final double UTC0_LONGITUDE = -0.118092;
 
+    @AfterEach
+    void resetSpy() {
+        Mockito.reset(spyBot);
+    }
+
+    @SuppressWarnings({"ReturnOfNull", "ChainedMethodCall"})
     @SneakyThrows
     @Test
     void shouldSaveLocation() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).onUpdateReceived(any(MessageDTO.class));
-
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).onUpdateReceived(any(MessageDTO.class));
         User testUser = new User(1L, null, null, null,
                 "testUserId", "testUserName", false);
+
         userRepository.save(testUser);
         assertFalse(userRepository.isLocationSpecified(1L));
 
@@ -69,25 +77,22 @@ class SaveLocationProcessorTest {
         MessageDTO messageDTO = new MessageDTO(update, Command.START);
         saveLocationProcessor.process(messageDTO);
 
-        verify(spyBot, times(2)).onUpdateReceived(commandCaptor.capture());
-
-        assertEquals(Command.ASK_TIME, commandCaptor.getAllValues().get(1).command());
-
-        assertTrue(userService.isLocationSpecified(1L));
+        assertAll(
+                () -> verify(spyBot, times(1)).onUpdateReceived(commandCaptor.capture()),
+                () -> assertEquals(Command.ASK_TIME, commandCaptor.getValue().command()),
+                () -> assertTrue(userService.isLocationSpecified(1L))
+        );
     }
 
 
+    @SuppressWarnings({"ReturnOfNull", "ChainedMethodCall"})
     @SneakyThrows
     @Test
     void shouldAdjustTime() {
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).execute(any(SendMessage.class));
-        Mockito.doAnswer(invocation -> {
-            return null;
-        }).when(spyBot).onUpdateReceived(any(MessageDTO.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        Mockito.doAnswer(invocation -> null).when(spyBot).onUpdateReceived(any(MessageDTO.class));
 
-        User user = new User(1L, 13.404954, 52.5200, LocalTime.of(0, 0),
+        User user = new User(1L, UTC1_LONGITUDE, UTC1_LATITUDE, LocalTime.of(0, 0),
                 "testUserId", "testUserName", false);
         userRepository.save(user);
 
@@ -95,8 +100,8 @@ class SaveLocationProcessorTest {
         Message message = new Message();
         Chat chat = new Chat();
         Location location = new Location();
-        location.setLatitude(51.509865);
-        location.setLongitude(-0.118092);
+        location.setLatitude(UTC0_LATITUDE);
+        location.setLongitude(UTC0_LONGITUDE);
         message.setLocation(location);
 
         long id = 1L;
@@ -110,20 +115,20 @@ class SaveLocationProcessorTest {
         UserService mockService = Mockito.mock(UserService.class);
         when(mockService.determinConfigurationStage(anyLong())).thenReturn(ConfigurationStage.NO_LOCATION_AND_TIME);
 
-        verify(spyBot, times(3)).onUpdateReceived(commandCaptor.capture());
-
-        assertEquals(Command.SHOW_CURRENT_SETTINGS, commandCaptor.getAllValues().get(2).command());
-
-        assertTrue(userService.isLocationSpecified(1L));
-        assertEquals(userService.findLongitude(1L), -0.118092);
-        assertEquals(userService.findLatitude(1L), 51.509865);
         User userFromDatabase = userService.findUser(1L);
         LocalTime localTime = userFromDatabase.getTime();
-        assertEquals(localTime, LocalTime.of(1, 0));
 
+        verify(spyBot, times(1)).onUpdateReceived(commandCaptor.capture());
+
+
+        assertAll(
+                () -> assertEquals(Command.SHOW_CURRENT_SETTINGS, commandCaptor.getValue().command()),
+                () -> assertTrue(userService.isLocationSpecified(1L)),
+                () -> assertEquals(UTC0_LONGITUDE, userService.findLongitude(1L)),
+                () -> assertEquals(UTC0_LATITUDE, userService.findLatitude(1L)),
+                () -> assertEquals(localTime, LocalTime.of(1, 0))
+        );
     }
-
-
     @Test
     void commandShouldBeSaveTime() {
         Command command = saveLocationProcessor.getCommandType();

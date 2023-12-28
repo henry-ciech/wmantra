@@ -29,7 +29,7 @@ public class MainController implements ErrorController {
     private static final String ERROR_HTML = "error";
 
     @Autowired
-    MainController(HtmlTagCreator htmlTagCreator, WeatherLocationRetriever weatherLocationRetriever) {
+    MainController(WeatherLocationRetriever weatherLocationRetriever, HtmlTagCreator htmlTagCreator) {
         upcomingTimeAndDayCalculator = new UpcomingTimeAndDayCalculator();
         this.htmlTagCreator = htmlTagCreator;
         this.weatherLocationRetriever = weatherLocationRetriever;
@@ -133,10 +133,15 @@ public class MainController implements ErrorController {
         model.addAttribute("currentHourPlusSix", hours[2]);
         model.addAttribute("currentHourPlusEight", hours[3]);
         model.addAttribute("currentHourPlusTen", hours[4]);
-        model.addAttribute("currentHourPlusTwoTemperature", forecastTemperatures.getCurrentHourPlusTwoTemperature());
-        model.addAttribute("currentHourPlusFourTemperature", forecastTemperatures.getCurrentHourPlusFourTemperature());
-        model.addAttribute("currentHourPlusSixTemperature", forecastTemperatures.getCurrentHourPlusSixTemperature());
-        model.addAttribute("currentHourPlusEightTemperature", forecastTemperatures.getCurrentHourPlusEightTemperature());
-        model.addAttribute("currentPlusTenTemperature", forecastTemperatures.getCurrentHourPlusTenTemperature());
+        model.addAttribute("currentHourPlusTwoTemperature",
+                forecastTemperatures.getCurrentHourPlusTwoTemperature());
+        model.addAttribute("currentHourPlusFourTemperature",
+                forecastTemperatures.getCurrentHourPlusFourTemperature());
+        model.addAttribute("currentHourPlusSixTemperature",
+                forecastTemperatures.getCurrentHourPlusSixTemperature());
+        model.addAttribute("currentHourPlusEightTemperature",
+                forecastTemperatures.getCurrentHourPlusEightTemperature());
+        model.addAttribute("currentPlusTenTemperature",
+                forecastTemperatures.getCurrentHourPlusTenTemperature());
     }
 }
