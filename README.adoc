@@ -92,11 +92,11 @@ Its workflow is as follows:
 === Templater
 
 Templater is centered around Spring MVC, this service responds to GET HTTP requests with location data.
-It queries a Weather API for current and forecast weather data, then integrates this information into a view
+It queries a Weather API for current and forecast weather data, then integrates this information into a view (HTML page).
 
 Weather API: https://www.weatherapi.com
 
-=== Bot - Screenshoter - Templater
+=== Workflow
 
 The complete workflow of the program is as follows:
 
@@ -107,8 +107,8 @@ The complete workflow of the program is as follows:
 . The Screenshoter forwards the request, including location data, to the Templater.
 . The Templater sends a request to the Weather API using the provided location data.
 . The Templater receives weather data from the Weather API.
-. The Templater pollutes view with weather data.
-. Templater exposes created html to the web.
+. The Templater pollutes the view (HTML template) with weather data.
+. Templater exposes the created HTML page to the web.
 . The Screenshoter captures a screenshot of the weather report provided by the Templater.
 . The Screenshoter sends the screenshot back to the Bot.
 . The Bot receives the screenshot from the Screenshoter.

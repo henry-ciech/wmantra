@@ -7,7 +7,6 @@ import eu.ciechanowiec.JsonPathsConstants;
 import eu.ciechanowiec.templater.model.*;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
@@ -15,18 +14,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-//TODO: extract time normally
 @Component
 public class WeatherLocationRetriever {
 
     private final UpcomingTimeAndDayCalculator upcomingTimeAndDayCalculator;
 
-    @Value("${api.key}")
-    private String apiKey;
-    @Value("${api.url}")
-    private String url;
     private final ObjectMapper objectMapper;
     private final WeatherApiClient weatherApiClient;
+    private static final int BEGIN_INDEX_OF_TIME_IN_RESPONSE = 11;
+    private static final int END_INDEX_OF_TIME_IN_RESPONSE = 16;
 
     @Autowired
     public WeatherLocationRetriever(WeatherApiClient weatherApiClient) {
@@ -46,7 +42,7 @@ public class WeatherLocationRetriever {
         String condition = currentWeatherNode.path(JsonPathsConstants.CONDITION).path(JsonPathsConstants.TEXT).asText();
         String dateAndTime = currentWeatherNode.path(JsonPathsConstants.LAST_UPDATE).asText();
 
-        String timeStr = dateAndTime.substring(11, 16);
+        String timeStr = dateAndTime.substring(BEGIN_INDEX_OF_TIME_IN_RESPONSE, END_INDEX_OF_TIME_IN_RESPONSE);
         LocalTime time = LocalTime.parse(timeStr);
 
         String city = locationNode.path(JsonPathsConstants.NAME).asText();

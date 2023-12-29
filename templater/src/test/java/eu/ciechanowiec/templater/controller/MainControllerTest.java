@@ -1,28 +1,18 @@
 package eu.ciechanowiec.templater.controller;
 
 import eu.ciechanowiec.templater.model.*;
-import eu.ciechanowiec.templater.service.HtmlTagCreator;
-import eu.ciechanowiec.templater.service.JsonParser;
-import eu.ciechanowiec.templater.service.WeatherApiClient;
 import eu.ciechanowiec.templater.service.WeatherLocationRetriever;
 import lombok.SneakyThrows;
-import org.apache.el.util.ReflectionUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.ModelResultMatchers;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.lang.reflect.ReflectPermission;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,36 +45,37 @@ class MainControllerTest {
         WeatherData expectedWeatherData = getTestData();
         when(weatherLocationRetriever.retrieve(anyDouble(), anyDouble())).thenReturn(expectedWeatherData);
 
+        ModelResultMatchers model = model();
         MvcResult mvcResult = mockMvc.perform(get("/")
                         .param("longitude", String.valueOf(0.0))
                         .param("latitude", String.valueOf(0.0)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
-                .andExpect(model().attribute("currentHourPlusTwoIcon", expectedCurrentHourPlusTwoIcon))
-                .andExpect(model().attribute("currentHourPlusFourIcon", expectedCurrentHourPlusFourIcon))
-                .andExpect(model().attribute("currentHourPlusSixIcon", expectedCurrentHourPlusSixIcon))
-                .andExpect(model().attribute("currentHourPlusEightIcon", expectedCurrentHourPlusEightIcon))
-                .andExpect(model().attribute("currentHourPlusTenIcon", expectedCurrentHourPlusTenIcon))
-                .andExpect(model().attribute("firstIcon", expectedFirstIcon))
-                .andExpect(model().attribute("secondIcon", expectedSecondIcon))
-                .andExpect(model().attribute("currentLocation", "Dagenham, United Kingdom"))
-                .andExpect(model().attribute("currentTemperature", "9"))
-                .andExpect(model().attribute("currentIconText", "Partly cloudy"))
-                .andExpect(model().attribute("currentIcon", expectedCurrentIcon))
-                .andExpect(model().attribute("currentHourPlusTwo", 0))
-                .andExpect(model().attribute("currentHourPlusFour", 2))
-                .andExpect(model().attribute("currentHourPlusSix", 4))
-                .andExpect(model().attribute("currentHourPlusEight", 6))
-                .andExpect(model().attribute("currentHourPlusTen", 8))
-                .andExpect(model().attribute("currentHourPlusTwoTemperature", "10.4"))
-                .andExpect(model().attribute("currentHourPlusFourTemperature", "8.2"))
-                .andExpect(model().attribute("currentHourPlusSixTemperature", "8.7"))
-                .andExpect(model().attribute("currentHourPlusEightTemperature", "8.3"))
-                .andExpect(model().attribute("currentPlusTenTemperature", "8.1"))
-                .andExpect(model().attribute("firstDayTemperature", "10.5"))
-                .andExpect(model().attribute("secondDayTemperature", "8.3"))
-                .andExpect(model().attribute("firstDayName", "Thursday"))
-                .andExpect(model().attribute("secondDayName", "Friday"))
+                .andExpect(model.attribute("currentHourPlusTwoIcon", expectedCurrentHourPlusTwoIcon))
+                .andExpect(model.attribute("currentHourPlusFourIcon", expectedCurrentHourPlusFourIcon))
+                .andExpect(model.attribute("currentHourPlusSixIcon", expectedCurrentHourPlusSixIcon))
+                .andExpect(model.attribute("currentHourPlusEightIcon", expectedCurrentHourPlusEightIcon))
+                .andExpect(model.attribute("currentHourPlusTenIcon", expectedCurrentHourPlusTenIcon))
+                .andExpect(model.attribute("firstIcon", expectedFirstIcon))
+                .andExpect(model.attribute("secondIcon", expectedSecondIcon))
+                .andExpect(model.attribute("currentLocation", "Dagenham, United Kingdom"))
+                .andExpect(model.attribute("currentTemperature", "9"))
+                .andExpect(model.attribute("currentIconText", "Partly cloudy"))
+                .andExpect(model.attribute("currentIcon", expectedCurrentIcon))
+                .andExpect(model.attribute("currentHourPlusTwo", 0))
+                .andExpect(model.attribute("currentHourPlusFour", 2))
+                .andExpect(model.attribute("currentHourPlusSix", 4))
+                .andExpect(model.attribute("currentHourPlusEight", 6))
+                .andExpect(model.attribute("currentHourPlusTen", 8))
+                .andExpect(model.attribute("currentHourPlusTwoTemperature", "10.4"))
+                .andExpect(model.attribute("currentHourPlusFourTemperature", "8.2"))
+                .andExpect(model.attribute("currentHourPlusSixTemperature", "8.7"))
+                .andExpect(model.attribute("currentHourPlusEightTemperature", "8.3"))
+                .andExpect(model.attribute("currentPlusTenTemperature", "8.1"))
+                .andExpect(model.attribute("firstDayTemperature", "10.5"))
+                .andExpect(model.attribute("secondDayTemperature", "8.3"))
+                .andExpect(model.attribute("firstDayName", "Thursday"))
+                .andExpect(model.attribute("secondDayName", "Friday"))
                 .andReturn();
 
         ModelAndView modelAndView = mvcResult.getModelAndView();

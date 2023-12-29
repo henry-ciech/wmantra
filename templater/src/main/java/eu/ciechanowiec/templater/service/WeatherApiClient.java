@@ -3,6 +3,7 @@ package eu.ciechanowiec.templater.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -15,8 +16,8 @@ public class WeatherApiClient {
     @Value("${api.url}")
     private String url;
 
-    public String getResponse(double latitude, double longitude) {
-        RestTemplate restTemplate = new RestTemplate();
+    String getResponse(double latitude, double longitude) {
+        RestOperations restTemplate = new RestTemplate();
         String urlWithLocation = fillWeatherUrl(latitude, longitude);
         ResponseEntity<String> response = restTemplate.getForEntity(urlWithLocation, String.class);
         return response.getBody();

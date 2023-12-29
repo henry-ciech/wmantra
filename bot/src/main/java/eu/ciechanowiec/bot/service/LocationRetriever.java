@@ -37,7 +37,6 @@ public class LocationRetriever {
         String responseBody = response.getBody();
 
         Gson gson = new Gson();
-        Location location = gson.fromJson(responseBody, Location.class);
-        return location;
+        return gson.fromJson(responseBody, Location.class);
     }
 }
