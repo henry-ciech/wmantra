@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eu.ciechanowiec</groupId>
+        <artifactId>wmantra</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>bot</artifactId>
+    <version>1.0.0</version>
+
+    <inceptionYear>2023</inceptionYear>
+    <name>bot</name>
+    <description>Java Program</description>
+    <url>https://ciechanowiec.eu/</url>
+    <properties>
+        <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
+        <pmdVersion>7.0.0-rc4</pmdVersion>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include> <!-- This includes all files in the resources directory -->
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- Configuration for PMD 7-RC as described here:
+                     - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
+                     - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <rulesets>
+                        <!-- For default rule sets see:
+                             - https://github.com/pmd/pmd/tree/master/pmd-java/src/main/resources
+                             - https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/rulesets/internal/all-java.xml -->
+                        <ruleset>/src/main/resources/static_code_analysis/pmd.xml
+                        </ruleset>
+                    </rulesets>
+                    <failOnViolation>${fail-build-on-static-code-analysis-errors}</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
+                    <verbose>true</verbose>
+                    <includeTests>true</includeTests>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-compat6</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-annotations</artifactId>
+                        <version>4.8.3</version>
+                        <scope>compile</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-javascript</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-jsp</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <configuration>
+                    <configLocation>
+                        /bot/src/main/resources/static_code_analysis/checkstyle.xml
+                    </configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>${fail-build-on-static-code-analysis-errors}</failsOnError>
+                    <linkXRef>false</linkXRef>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- SpotBugs Maven Plugin -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

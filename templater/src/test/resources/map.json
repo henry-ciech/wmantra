@@ -1,0 +1,203 @@
+{
+  "htmlTemplate": "<i class=\"iconName\" style=\"color: iconColor; font-size: iconSize; margin-bottom: 8px; margin-top: marginTop; margin-right: 2x\"></i>",
+  "defaultColor": "#a9a9a9",
+  "smallIconSize": "40px",
+  "bigIconSize" : "55px",
+  "mainIconSize": "75px",
+  "mainMarginTop": "17px",
+  "subMarginTop": "0px",
+  "conditionMappings": {
+    "sunny": {
+      "iconName": "fas fa-sun",
+      "customColor": "#ff8c00"
+    },
+    "clear": {
+      "iconName": "fas fa-moon",
+      "customColor": "#5f9ea0"
+    },
+    "cloudy": {
+      "iconName": "fas fa-cloud",
+      "customColor": "#737373"
+    },
+    "partly cloudy": {
+      "iconName": "fas fa-cloud",
+      "customColor": "#737373"
+    },
+    "overcast": {
+      "iconName": "fas fa-cloud",
+      "customColor": "#737373"
+    },
+    "mist": {
+      "iconName": "fas fa-smog",
+      "customColor": "#c0c0c0"
+    },
+    "patchy rain possible": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#0099cc"
+    },
+    "patchy snow possible": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "patchy sleet possible": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "patchy freezing drizzle possible": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#00bfff"
+    },
+    "thundery outbreaks possible": {
+      "iconName": "fas fa-bolt",
+      "customColor": "#ffcc00"
+    },
+    "blowing snow": {
+      "iconName": "fas fa-wind",
+      "customColor": "#00bfff"
+    },
+    "blizzard": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "fog": {
+      "iconName": "fas fa-smog",
+      "customColor": "#c0c0c0"
+    },
+    "freezing fog": {
+      "iconName": "fas fa-smog",
+      "customColor": "#c0c0c0"
+    },
+    "light drizzle": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#99d6ff"
+    },
+    "freezing drizzle": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#9dd8e6"
+    },
+    "heavy freezing drizzle": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#9dd8e6"
+    },
+    "patchy light rain": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#87ceeb"
+    },
+    "patchy light drizzle": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#87ceeb"
+    },
+    "light rain": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#87ceeb"
+    },
+    "moderate rain at times": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "moderate rain": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "heavy rain at times": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#4682b4"
+    },
+    "heavy rain": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#4682b4"
+    },
+    "light freezing rain": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "moderate or heavy freezing rain": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "light sleet": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "moderate or heavy sleet": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "patchy light snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "light snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "patchy moderate snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "moderate snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "patchy heavy snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#00bfff"
+    },
+    "heavy snow": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "ice pellets": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "light rain shower": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "moderate or heavy rain shower": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#4682b4"
+    },
+    "torrential rain shower": {
+      "iconName": "fas fa-cloud-showers-heavy",
+      "customColor": "#4682b4"
+    },
+    "light sleet showers": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "moderate or heavy sleet showers": {
+      "iconName": "fas fa-cloud-rain",
+      "customColor": "#4682b4"
+    },
+    "light snow showers": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "moderate or heavy snow showers": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "light showers of ice pellets": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "moderate or heavy showers of ice pellets": {
+      "iconName": "fas fa-snowflake",
+      "customColor": "#0000ff"
+    },
+    "patchy light rain with thunder": {
+      "iconName": "fas fa-bolt",
+      "customColor": "#ffd700"
+    },
+    "moderate or heavy rain with thunder": {
+      "iconName": "fas fa-bolt",
+      "customColor": "#ffd700"
+    },
+    "question": {
+      "iconName": "fas fa-question",
+      "customColor": "#737373"
+    }
+  }
+}
