@@ -39,7 +39,6 @@ public class StartProcessor implements Processor {
         Long chatId = message.getChatId();
         String chatIdStr = String.valueOf(chatId);
         String userId = chat.getUserName();
-
         SendMessage sendMessage = new SendMessage(chatIdStr, messageToSend);
         telegramBot.execute(sendMessage);
 

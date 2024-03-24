@@ -31,7 +31,6 @@ class UnknownProcessor implements Processor {
         Update update = messageDTO.update();
         Message message = update.getMessage();
         long chatId = message.getChatId();
-
         sendErrorMessage(chatId, messageDTO);
     }
 

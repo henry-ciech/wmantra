@@ -5,8 +5,8 @@ import puppeteer from 'puppeteer';
 dotenv.config();
 
 const app = express();
-const screenshotterPort = process.env.SCREENSHOTTER_PORT || 8084;
-const templaterPort = process.env.TEMPLATER_PORT || 8080;
+const screenshotterPort = process.env.SCREENSHOTTER_PORT;
+const templaterPort = process.env.TEMPLATER_PORT;
 
 app.get('/take-screenshot', async (req, res) => {
     const longitude = req.query.longitude || 'longitude';
