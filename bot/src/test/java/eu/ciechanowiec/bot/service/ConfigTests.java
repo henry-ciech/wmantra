@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 
+import java.util.concurrent.Executor;
+
 @Configuration
 @SuppressWarnings({"java:S2187", "PMD.TestClassWithoutTestCases"})
 public class ConfigTests {
@@ -14,7 +16,12 @@ public class ConfigTests {
     @Primary
     public TelegramBot telegramBot(BotConfig botConfig, DefaultBotOptions defaultBotOptions,
                                    ApplicationContext applicationContext) {
-        TelegramBot telegramBot = new TelegramBot(botConfig, defaultBotOptions, applicationContext);
+        TelegramBot telegramBot = new TelegramBot(botConfig, defaultBotOptions, applicationContext, new Executor() {
+            @Override
+            public void execute(Runnable command) {
+
+            }
+        });
         return Mockito.spy(telegramBot);
     }
 }

@@ -8,6 +8,8 @@ services:
       dockerfile: bot/Dockerfile
     volumes:
       - /var/log/bot_logs:/logs
+    ports:
+      - "5005:5005"
     environment:
       - LOGGING_FILE_RELATIVE_PATH=/logs/application.log
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_EXCLUDE=*

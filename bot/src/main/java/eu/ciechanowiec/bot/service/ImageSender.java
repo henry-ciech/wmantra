@@ -1,6 +1,7 @@
 package eu.ciechanowiec.bot.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import eu.ciechanowiec.bot.utils.KeyboardCreator;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,6 +26,7 @@ public class ImageSender {
     private final UserService userService;
     private final TelegramBot telegramBot;
     private final ScreenshotterClient screenshotterClient;
+    private final KeyboardCreator keyboardCreator;
 
     @Value("${error.image.path}")
     private String imagePath;
@@ -33,6 +36,7 @@ public class ImageSender {
         this.userService = userService;
         this.telegramBot = telegramBot;
         this.screenshotterClient = screenshotterClient;
+        keyboardCreator = new KeyboardCreator();
     }
 
     @SneakyThrows
@@ -58,6 +62,8 @@ public class ImageSender {
 
         InputFile inputFile = new InputFile(photoToSend, "image.png");
         SendPhoto photo = new SendPhoto(String.valueOf(chatId), inputFile);
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardCreator.createReplyKeyboardMarkup();
+        photo.setReplyMarkup(replyKeyboardMarkup);
         log.info("Send image to the user");
 
         telegramBot.execute(photo);

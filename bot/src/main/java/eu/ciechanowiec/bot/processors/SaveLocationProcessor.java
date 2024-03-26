@@ -5,6 +5,7 @@ import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.User;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
+import eu.ciechanowiec.bot.utils.KeyboardCreator;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.time.*;
 import java.util.Optional;
@@ -28,6 +30,7 @@ class SaveLocationProcessor implements Processor {
     private final UserService userService;
     private final MessageTemplater messageTemplater;
     private final Command command;
+    private final KeyboardCreator keyboardCreator;
 
     @Autowired
     SaveLocationProcessor(TelegramBot telegramBot, UserService userService, MessageTemplater messageTemplater) {
@@ -35,6 +38,7 @@ class SaveLocationProcessor implements Processor {
         this.userService = userService;
         this.messageTemplater = messageTemplater;
         command = Command.SAVE_LOCATION;
+        keyboardCreator = new KeyboardCreator();
     }
 
     @SneakyThrows
@@ -70,6 +74,8 @@ class SaveLocationProcessor implements Processor {
         String messageToSend = messageTemplater.getNotifyForNewLocation();
 
         SendMessage sendMessage = new SendMessage(chatIdStr, messageToSend);
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardCreator.createReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
         telegramBot.execute(sendMessage);
 
         MessageDTO messageWithNewType = messageDTO.withNewMessageType(Command.SHOW_CURRENT_SETTINGS);

@@ -4,6 +4,7 @@ import eu.ciechanowiec.bot.model.*;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
 import eu.ciechanowiec.bot.service.LocationRetriever;
+import eu.ciechanowiec.bot.utils.KeyboardCreator;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import eu.ciechanowiec.bot.utils.ReportsScheduler;
 import lombok.SneakyThrows;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.time.LocalTime;
 import java.time.OffsetTime;
@@ -29,6 +31,7 @@ class ShowCurrentSettingsProcessor implements Processor {
     private final ReportsScheduler reportsScheduler;
     private final MessageTemplater messageTemplater;
     private final Command command;
+    private final KeyboardCreator keyboardCreator;
 
     @Autowired
     @SuppressWarnings({"PMD.ExcessiveParameterList", "ParameterNumber"})
@@ -40,6 +43,7 @@ class ShowCurrentSettingsProcessor implements Processor {
         this.reportsScheduler = reportsScheduler;
         this.messageTemplater = messageTemplater;
         command = Command.SHOW_CURRENT_SETTINGS;
+        keyboardCreator = new KeyboardCreator();
     }
 
     @SneakyThrows
@@ -73,6 +77,8 @@ class ShowCurrentSettingsProcessor implements Processor {
         log.info("Message scheduled");
         reportsScheduler.schedule(user);
         log.info("Showing current settings");
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardCreator.createReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
         telegramBot.execute(sendMessage);
     }
 
