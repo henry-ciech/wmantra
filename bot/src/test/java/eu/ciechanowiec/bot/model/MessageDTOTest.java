@@ -1,12 +1,10 @@
 package eu.ciechanowiec.bot.model;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class MessageDTOTest {
 
     @Test

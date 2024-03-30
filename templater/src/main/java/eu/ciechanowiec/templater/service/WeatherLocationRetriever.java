@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.ciechanowiec.JsonPathsConstants;
+import eu.ciechanowiec.templater.JsonPathsConstants;
 import eu.ciechanowiec.templater.model.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

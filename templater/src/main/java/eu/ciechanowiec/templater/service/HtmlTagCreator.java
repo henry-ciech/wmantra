@@ -6,6 +6,7 @@ import eu.ciechanowiec.templater.model.WeatherCondition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class HtmlTagCreator {
         String normalizedCondition = trimmedCondition.toLowerCase(Locale.ROOT);
         HtmlData htmlData = jsonParser.createHtmlData();
         Map<String, WeatherCondition> conditions = htmlData.getConditionMappings();
+        extendConditionsMap(conditions);
 
         Optional<WeatherCondition> weatherConditionNullable = Optional.ofNullable(conditions.get(normalizedCondition));
 
@@ -37,8 +39,14 @@ public class HtmlTagCreator {
         String iconColor;
 
         if (weatherConditionNullable.isEmpty()) {
-            iconName = "fas fa-question";
-            iconColor = "#737373";
+            WeatherCondition defaultIcon = conditions.entrySet().stream()
+                    .filter(entry -> normalizedCondition.contains(entry.getKey()))
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(new WeatherCondition("fas fa-question", "#737373")); // Default icon and color
+
+            iconName = defaultIcon.getIconName();
+            iconColor = defaultIcon.getCustomColor();
         } else {
             WeatherCondition weatherCondition = weatherConditionNullable.get();
             iconName = weatherCondition.getIconName();
@@ -50,11 +58,22 @@ public class HtmlTagCreator {
         return processTemplate(tagTemplate, templateInfo);
     }
 
+    private void extendConditionsMap(Map<String, WeatherCondition> conditions) {
+        conditions.put("cloud", new WeatherCondition("fas fa-cloud", "#737373"));
+        conditions.put("rain", new WeatherCondition("fas fa-cloud-rain", "#0099cc"));
+        conditions.put("snow", new WeatherCondition("fas fa-snowflake", "#00bfff"));
+        conditions.put("sleet", new WeatherCondition("fas fa-snowflake", "#00bfff"));
+        conditions.put("drizzle", new WeatherCondition("fas fa-cloud-showers-heavy", "#0099cc"));
+        conditions.put("thunder", new WeatherCondition("fas fa-bolt", "#ffcc00"));
+        conditions.put("shower", new WeatherCondition("fas fa-cloud-rain", "#4682b4"));
+    }
+
     public String createSubTag(String conditionFromRequest, String sizeFromJson) {
         String trimmedCondition = conditionFromRequest.trim();
         String normalizedCondition = trimmedCondition.toLowerCase(Locale.ROOT);
         HtmlData htmlData = jsonParser.createHtmlData();
         Map<String, WeatherCondition> conditions = htmlData.getConditionMappings();
+        extendConditionsMap(conditions);
         Optional<WeatherCondition> weatherConditionNullable = Optional.ofNullable(conditions.get(normalizedCondition));
 
         String iconName;
@@ -62,7 +81,13 @@ public class HtmlTagCreator {
         String size;
 
         if (weatherConditionNullable.isEmpty()) {
-            iconName = "fas fa-question";
+            WeatherCondition defaultIcon = conditions.entrySet().stream()
+                    .filter(entry -> normalizedCondition.contains(entry.getKey()))
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(new WeatherCondition("fas fa-question", iconColor)); // Default icon and color
+
+            iconName = defaultIcon.getIconName();
         } else {
             WeatherCondition weatherCondition = weatherConditionNullable.get();
             iconName = weatherCondition.getIconName();

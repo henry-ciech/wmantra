@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootTest
+@Profile("test")
 class BotConfigTest {
 
     @Autowired
@@ -20,7 +22,6 @@ class BotConfigTest {
     @Test
     void testBotToken() {
         String botToken = botConfig.getToken();
-        System.out.println(botToken);
         assertEquals("test.token", botToken);
     }
 }

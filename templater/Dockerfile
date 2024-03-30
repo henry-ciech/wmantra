@@ -1,12 +1,22 @@
-FROM maven:3.9.6-eclipse-temurin-17-focal AS build
+FROM maven:latest AS build
 WORKDIR /app
 
-COPY .env .
+COPY .env ./
 COPY pom.xml ./
+COPY set-env-variables.sh ./
+COPY templater/pom.xml templater/
+COPY bot/pom.xml bot/
+RUN chmod a+rwx set-env-variables.sh
+
+RUN mvn dependency:go-offline -DskipAdvancedDependencyResolution
+RUN mvn dependency:resolve-plugins -DskipAdvancedDependencyResolution
+RUN mvn dependency:analyze -DskipAdvancedDependencyResolution
+RUN mvn versions:display-parent-updates -DskipAdvancedDependencyResolution
+RUN mvn versions:display-property-updates -DskipAdvancedDependencyResolution
 
 COPY templater/ templater/
 
-RUN mvn -f templater/pom.xml clean package -DskipTests
+RUN mvn -f templater/pom.xml clean package -DskipAdvancedDependencyResolution
 
 FROM eclipse-temurin:17
 WORKDIR /app

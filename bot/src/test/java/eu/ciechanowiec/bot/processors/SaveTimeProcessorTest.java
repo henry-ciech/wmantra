@@ -14,6 +14,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -29,7 +30,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @ActiveProfiles("h2")
 class SaveTimeProcessorTest {
 
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private UserService userService;
@@ -98,7 +99,7 @@ class SaveTimeProcessorTest {
 
         assertAll(
                 () -> verify(spyBot).onUpdateReceived(commandCaptor.capture()),
-                () -> assertEquals(Command.SHOW_CURRENT_SETTINGS, commandCaptor.getValue().command())
+                () -> assertEquals(Command.ASK_LOCATION, commandCaptor.getValue().command())
         );
     }
 

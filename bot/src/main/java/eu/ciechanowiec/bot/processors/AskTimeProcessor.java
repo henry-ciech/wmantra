@@ -2,6 +2,7 @@ package eu.ciechanowiec.bot.processors;
 
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.MessageDTO;
+import eu.ciechanowiec.bot.utils.KeyboardCreator;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
 import eu.ciechanowiec.bot.service.TelegramBot;
@@ -24,12 +25,14 @@ class AskTimeProcessor implements Processor {
     private final TelegramBot telegramBot;
     private final MessageTemplater messageTemplater;
     private final Command command;
+    private final KeyboardCreator keyboardCreator;
 
     @Autowired
     AskTimeProcessor(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
         this.messageTemplater = new MessageTemplater();
         command = Command.ASK_TIME;
+        keyboardCreator = new KeyboardCreator();
     }
 
     @SneakyThrows
@@ -49,24 +52,10 @@ class AskTimeProcessor implements Processor {
         String chatIdStr = String.valueOf(chatId);
         SendMessage sendMessage = new SendMessage(chatIdStr, messageText);
         sendMessage.setParseMode(ParseMode.MARKDOWN);
-        sendMessage.setReplyMarkup(createReplyKeyboardMarkup());
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardCreator.createReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
 
         return sendMessage;
-    }
-
-    @SuppressWarnings("PMD.LooseCoupling")
-    private ReplyKeyboardMarkup createReplyKeyboardMarkup() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        KeyboardRow firstRow = new KeyboardRow();
-        KeyboardRow secondRow = new KeyboardRow();
-        firstRow.add(MessageTemplater.SHOW_CURRENT_WEATHER_TEXT);
-        secondRow.add(MessageTemplater.CONFIGURE_TEXT);
-        keyboardRows.add(firstRow);
-        keyboardRows.add(secondRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-        return replyKeyboardMarkup;
     }
 
     @Override

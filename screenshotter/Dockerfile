@@ -13,12 +13,11 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app
 
+RUN mkdir /app/logs
+
 COPY .env .
 COPY screenshotter/ .
 
 RUN npm install
 
-
-EXPOSE 8084
-
-CMD ["node", "screenshotter.mjs"]
+CMD ["sh", "-c", "node screenshotter.mjs >> /app/logs/application.log 2>&1"]

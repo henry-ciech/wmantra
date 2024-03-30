@@ -16,6 +16,7 @@ import org.mockito.Captor;
 import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -32,7 +33,7 @@ class SaveLocationProcessorTest {
     private static final double UTC1_LATITUDE = 52.52;
     private static final double UTC0_LATITUDE = 51.509_865;
     private static final double UTC0_LONGITUDE = -0.118_092;
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private UserService userService;

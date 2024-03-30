@@ -12,10 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -31,13 +31,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @SpringBootTest
 @SuppressWarnings("PMD.TooManyStaticImports")
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class AskLocationProcessorTest {
 
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
     @Autowired
     private TelegramBot spyBot;
-
     @Autowired
     private AskLocationProcessor askLocationProcessor;
 
@@ -72,12 +72,9 @@ class AskLocationProcessorTest {
 
         askLocationProcessor.process(messageDTO);
 
-        SendMessage value = sendMessageCaptor.getValue();
-        String text = value.getText();
-        SendMessage capture = sendMessageCaptor.capture();
         assertAll(
-                () -> verify(spyBot, times(1)).execute(capture),
-                () -> assertEquals(askLocationMessage, text)
+                () -> verify(spyBot, times(1)).execute(sendMessageCaptor.capture()),
+                () -> assertEquals(askLocationMessage, sendMessageCaptor.getValue().getText())
         );
     }
 }

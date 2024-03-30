@@ -4,23 +4,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.4</version>
+        <relativePath/>
+    </parent>
+
     <groupId>eu.ciechanowiec</groupId>
     <artifactId>wmantra</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
-        <relativePath/>
-    </parent>
-
     <!-- Add modules here -->
     <modules>
         <module>bot</module>
         <module>templater</module>
-        <module>screenshotter</module>
     </modules>
 
     <properties>
@@ -48,10 +47,15 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>3.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -323,6 +327,26 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <id>set-env-variables</id>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>bash</executable>
+                                <arguments>
+                                    <argument>${project.basedir}/set-env-variables.sh</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <!-- Configuration for PMD 7-RC as described here:
                          - https://github.com/pmd/pmd/discussions/4478#discussioncomment-7607566
                          - https://maven.apache.org/plugins/maven-pmd-plugin/examples/upgrading-PMD-at-runtime.html -->
@@ -429,7 +453,7 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <artifactId>maven-Checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
                     <configuration>
                         <configLocation>static_code_analysis/checkstyle.xml
@@ -454,7 +478,7 @@
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <version>${spotbugs-maven-plugin.version}</version>
                     <configuration>
-<!--                        <excludeFilterFile>static_code_analysis/spotbugs-exclude.xml</excludeFilterFile>-->
+                        <excludeFilterFile>static_code_analysis/spotbugs-exclude.xml</excludeFilterFile>
                         <failOnError>false</failOnError>
                         <includeTests>true</includeTests>
                         <effort>Max</effort>
@@ -636,6 +660,46 @@
             <properties>
                 <enforce-tests-coverage>false</enforce-tests-coverage>
             </properties>
+        </profile>
+        <profile>
+            <id>advanced-dependency-resolution</id>
+            <activation>
+                <!-- By default, this profile is active and is disabled when the property below is present  -->
+                <property>
+                    <name>!skipAdvancedDependencyResolution</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>download-sources</id>
+                                <goals>
+                                    <goal>sources</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>download-javadoc</id>
+                                <goals>
+                                    <goal>resolve</goal>
+                                </goals>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <silent>true</silent>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

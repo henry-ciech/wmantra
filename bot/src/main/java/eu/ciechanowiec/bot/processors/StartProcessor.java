@@ -4,6 +4,7 @@ import eu.ciechanowiec.bot.model.MessageDTO;
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import eu.ciechanowiec.bot.service.UserService;
+import eu.ciechanowiec.bot.utils.KeyboardCreator;
 import eu.ciechanowiec.bot.utils.MessageTemplater;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 @Service
 public class StartProcessor implements Processor {
@@ -20,6 +22,7 @@ public class StartProcessor implements Processor {
     private final UserService userService;
     private final MessageTemplater messageTemplater;
     private final Command command;
+    private final KeyboardCreator keyboardCreator;
 
     @Autowired
     StartProcessor(TelegramBot telegramBot, UserService userService) {
@@ -27,6 +30,7 @@ public class StartProcessor implements Processor {
         this.userService = userService;
         this.messageTemplater = new MessageTemplater();
         command = Command.START;
+        keyboardCreator = new KeyboardCreator();
     }
 
     @SneakyThrows
@@ -39,8 +43,9 @@ public class StartProcessor implements Processor {
         Long chatId = message.getChatId();
         String chatIdStr = String.valueOf(chatId);
         String userId = chat.getUserName();
-
         SendMessage sendMessage = new SendMessage(chatIdStr, messageToSend);
+        ReplyKeyboardMarkup replyKeyboardMarkup = keyboardCreator.createReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
         telegramBot.execute(sendMessage);
 
         if (userService.isUserExists(chatId)) {

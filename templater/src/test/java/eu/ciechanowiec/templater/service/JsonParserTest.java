@@ -2,22 +2,26 @@ package eu.ciechanowiec.templater.service;
 
 import eu.ciechanowiec.templater.model.HtmlData;
 import eu.ciechanowiec.templater.model.WeatherCondition;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class JsonParserTest {
 
+    @SneakyThrows
     @Test
     void testCreateHtmlData() {
         JsonParser jsonParser = new JsonParser();
 
-        ReflectionTestUtils.setField(jsonParser, "jsonFilePath",
-                "/home/debian/wmantra/templater/src/test/resources/map.json");
-
+        ReflectionTestUtils.setField(jsonParser, "jsonFilePath", "map.json");
         HtmlData result = jsonParser.createHtmlData();
 
         Map<String, WeatherCondition> conditionMappings = result.getConditionMappings();
