@@ -27,12 +27,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final ApplicationContext applicationContext;
 
     @Autowired
-    TelegramBot(BotConfig botConfig, DefaultBotOptions options, ApplicationContext applicationContext,
-                @Qualifier("applicationTaskExecutor") Executor telegramBotExecutor) {
+    TelegramBot(BotConfig botConfig, DefaultBotOptions options, ApplicationContext applicationContext) {
         super(options, botConfig.getToken());
         this.botConfig = botConfig;
         this.applicationContext = applicationContext;
-        this.telegramBotExecutor = telegramBotExecutor;
+        telegramBotExecutor = applicationContext.getBean(Executor.class);
     }
 
     @Override

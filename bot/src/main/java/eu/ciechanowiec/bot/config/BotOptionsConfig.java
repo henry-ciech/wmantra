@@ -3,10 +3,12 @@ package eu.ciechanowiec.bot.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 
 @Configuration
+@Profile("!test")
 class BotOptionsConfig {
 
     @Bean
@@ -17,8 +19,6 @@ class BotOptionsConfig {
     @Bean
     @Primary
     DefaultBotOptions defaultBotOptions() {
-        DefaultBotOptions defaultBotOptions = new DefaultBotOptions();
-        defaultBotOptions.setMaxThreads(50);
-        return defaultBotOptions;
+        return new DefaultBotOptions();
     }
 }

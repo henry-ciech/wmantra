@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -31,9 +32,8 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class ImageSenderTest {
 
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
-
     @Captor
     private ArgumentCaptor<SendPhoto> photoCaptor;
 

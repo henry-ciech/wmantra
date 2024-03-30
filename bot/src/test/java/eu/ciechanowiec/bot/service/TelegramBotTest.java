@@ -3,11 +3,16 @@ package eu.ciechanowiec.bot.service;
 import eu.ciechanowiec.bot.model.Command;
 import eu.ciechanowiec.bot.model.MessageDTO;
 import lombok.SneakyThrows;
+import org.jboss.jandex.Main;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Profile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -16,10 +21,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
+@SpringBootTest(classes = Main.class)
+@Profile("test")
 class TelegramBotTest {
 
-    @Autowired
+    @MockBean
     private TelegramBot spyBot;
 
     @AfterEach
@@ -43,7 +49,6 @@ class TelegramBotTest {
         spyBot.onUpdateReceived(update);
 
         TelegramBot verify = verify(spyBot);
-        MessageDTO messageDTO = new MessageDTO(update, Command.CONFIG);
-        verify.onUpdateReceived(messageDTO);
+        verify.onUpdateReceived(update);
     }
 }

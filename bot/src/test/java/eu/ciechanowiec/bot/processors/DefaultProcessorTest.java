@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -33,7 +34,7 @@ class DefaultProcessorTest {
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
 
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private DefaultProcessor defaultProcessor;

@@ -20,7 +20,7 @@ class WeatherLocationRetrieverTest {
     @SneakyThrows
     @Test
     void testRetrieve() {
-        String filePath = "/home/debian/wmantra/templater/src/test/resources/jsonResponse.json";
+        String filePath = "src/test/resources/jsonResponse.json";
         String jsonResponse = Files.readString(Paths.get(filePath));
 
         WeatherApiClient weatherApiClient = mock(WeatherApiClient.class);

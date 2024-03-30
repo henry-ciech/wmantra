@@ -14,6 +14,7 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -37,7 +38,7 @@ class StartProcessorTest {
     private ArgumentCaptor<MessageDTO> commandCaptor;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private StartProcessor startProcessor;

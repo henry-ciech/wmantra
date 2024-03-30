@@ -1,4 +1,4 @@
-package eu.ciechanowiec;
+package eu.ciechanowiec.templater;
 
 @SuppressWarnings("PMD.DataClass")
 public final class JsonPathsConstants {

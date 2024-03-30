@@ -28,5 +28,25 @@
                 </includes>
             </resource>
         </resources>
+
+        <!-- Specify the plugins section here -->
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>eu.ciechanowiec.templater.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

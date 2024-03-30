@@ -16,7 +16,7 @@ public class TestConfig {
     public HtmlTagCreator htmlTagCreator() {
         JsonParser jsonParser = spy(new JsonParser());
         ReflectionTestUtils.setField(jsonParser, "jsonFilePath",
-                "/home/debian/wmantra/templater/src/test/resources/map.json");
+                "map.json");
         return new HtmlTagCreator(jsonParser);
     }
 }

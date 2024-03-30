@@ -18,9 +18,20 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
+
+import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +44,7 @@ class ShowCurrentWeatherProcessorTest {
 
     private static final double UTC0_LATITUDE = 51_509_865;
     private static final double UTC0_LONGITUDE = -118_092;
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private UserRepository userRepository;
@@ -74,39 +85,39 @@ class ShowCurrentWeatherProcessorTest {
         reset(spyBot);
     }
 
-//    @SneakyThrows
-//    @Test
-//    void shouldSendImage() {
-//        doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
-//        doAnswer(invocation -> null).when(spyBot).execute(any(SendChatAction.class));
-//        doAnswer(invocation -> null).when(spyBot).execute(any(SendPhoto.class));
-//
-//        UserService userService = new UserService(userRepository);
-//
-//        Path path = Paths.get(testImagePath);
-//        byte[] testImageBytes = Files.readAllBytes(path);
-//
-//        ScreenshotterClient mockScreenshotterClient = mock(ScreenshotterClient.class);
-//        when(mockScreenshotterClient.getImageAsInputStream(anyDouble(), anyDouble()))
-//                .thenReturn(new ByteArrayInputStream(testImageBytes));
-//        ImageSender imageSender = getImageSenderSpy(mockScreenshotterClient);
-//        ReflectionTestUtils.setField(imageSender, "imagePath", testImagePath);
-//
-//        Processor showCurrentWeatherProcessor = new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
-//        User user = new User(1L, UTC0_LONGITUDE, UTC0_LATITUDE, LocalTime.of(0, 0),
-//                "testUserId", "testUserName", false);
-//
-//        ReflectionTestUtils.setField(imageSender, "imagePath", errorImagePath);
-//
-//        userRepository.save(user);
-//
-//        MessageDTO messageDTO = getMessageDTO(user);
-//        showCurrentWeatherProcessor.process(messageDTO);
-//
-//        verify(imageSender).sendImageToTheUser(anyLong());
-//        Command command = showCurrentWeatherProcessor.getCommandType();
-//        assertEquals(Command.SHOW_CURRENT_WEATHER, command);
-//    }
+    @SneakyThrows
+    @Test
+    void shouldSendImage() {
+        doAnswer(invocation -> null).when(spyBot).execute(any(SendMessage.class));
+        doAnswer(invocation -> null).when(spyBot).execute(any(SendChatAction.class));
+        doAnswer(invocation -> null).when(spyBot).execute(any(SendPhoto.class));
+
+        UserService userService = new UserService(userRepository);
+
+        Path path = Paths.get(testImagePath);
+        byte[] testImageBytes = Files.readAllBytes(path);
+
+        ScreenshotterClient mockScreenshotterClient = mock(ScreenshotterClient.class);
+        when(mockScreenshotterClient.getImageAsInputStream(anyDouble(), anyDouble()))
+                .thenReturn(Optional.of(new ByteArrayInputStream(testImageBytes)));
+        ImageSender imageSender = getImageSenderSpy(mockScreenshotterClient);
+        ReflectionTestUtils.setField(imageSender, "imagePath", testImagePath);
+
+        Processor showCurrentWeatherProcessor = new ShowCurrentWeatherProcessor(imageSender, spyBot, userService);
+        User user = new User(1L, UTC0_LONGITUDE, UTC0_LATITUDE, LocalTime.of(0, 0),
+                "testUserId", "testUserName", false);
+
+        ReflectionTestUtils.setField(imageSender, "imagePath", errorImagePath);
+
+        userRepository.save(user);
+
+        MessageDTO messageDTO = getMessageDTO(user);
+        showCurrentWeatherProcessor.process(messageDTO);
+
+        verify(imageSender).sendImageToTheUser(anyLong());
+        Command command = showCurrentWeatherProcessor.getCommandType();
+        assertEquals(Command.SHOW_CURRENT_WEATHER, command);
+    }
 
     private static MessageDTO getMessageDTO(User user) {
         Chat chat = new Chat();

@@ -20,7 +20,7 @@ public class ScreenshotterClient {
     private String baseUrl;
 
     @SneakyThrows
-    Optional<ByteArrayInputStream> getImageAsInputStream(double longitude, double latitude) {
+    public Optional<ByteArrayInputStream> getImageAsInputStream(double longitude, double latitude) {
         log.info("Send request to the screenshotter");
         String url = String.format("%s/take-screenshot?longitude=%f&latitude=%f", baseUrl, longitude, latitude);
         log.info("Screenshotter url requesting to {}", url);

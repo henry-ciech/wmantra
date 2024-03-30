@@ -3,9 +3,11 @@ FROM maven:latest AS build
 WORKDIR /app
 
 COPY pom.xml ./
-
+COPY .env .
+COPY set-env-variables.sh .
 COPY templater/pom.xml templater/
 COPY bot/pom.xml bot/
+RUN chmod a+rwx ./set-env-variables.sh
 
 RUN mvn dependency:go-offline -DskipAdvancedDependencyResolution
 RUN mvn dependency:resolve-plugins -DskipAdvancedDependencyResolution
@@ -13,10 +15,9 @@ RUN mvn dependency:analyze -DskipAdvancedDependencyResolution
 RUN mvn versions:display-parent-updates -DskipAdvancedDependencyResolution
 RUN mvn versions:display-property-updates -DskipAdvancedDependencyResolution
 
-COPY .env .
 COPY bot/ bot/
 
-RUN mvn -f bot/pom.xml clean package -DskipTests -Dpmd.skip=true -DskipAdvancedDependencyResolution
+RUN mvn clean package -DskipTests -DskipAdvancedDependencyResolution
 
 FROM eclipse-temurin:17
 WORKDIR /app

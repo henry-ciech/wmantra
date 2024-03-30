@@ -12,6 +12,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -27,11 +28,10 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @SpringBootTest
 class UnknownProcessorTest {
 
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private UnknownProcessor unknownProcessor;
-
     @Captor
     private ArgumentCaptor<SendMessage> sendMessageCaptor;
     @Captor
@@ -58,7 +58,7 @@ class UnknownProcessorTest {
         unknownProcessor.process(messageDTO);
 
         verify(spyBot, times(2)).execute(sendMessageCaptor.capture());
-        verify(spyBot, times(2)).onUpdateReceived(messageDTOCaptor.capture());
+        verify(spyBot, times(1)).onUpdateReceived(messageDTOCaptor.capture());
 
         List<MessageDTO> allValues = messageDTOCaptor.getAllValues();
         MessageDTO actualMessageDTO = allValues.get(0);

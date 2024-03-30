@@ -1,11 +1,14 @@
 package eu.ciechanowiec.bot.config;
 
+import eu.ciechanowiec.bot.service.ConfigTests;
 import eu.ciechanowiec.bot.service.TelegramBot;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.mockito.MockedConstruction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.meta.generics.LongPollingBot;
@@ -17,9 +20,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@Import(ConfigTests.class)
 class BotRegistrarTest {
 
-    @Autowired
+    @SpyBean
     private TelegramBot spyBot;
     @Autowired
     private BotRegistrar botRegistrar;
